@@ -1,0 +1,24 @@
+{
+  "name": "flXu12.github.io",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:flXu12/flXu12.github.io.git",
+  "author": "flXu12",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vuepress dev docs",
+    "build": "vuepress build docs"
+  },
+  "devDependencies": {
+    "@vuepress-reco/vuepress-plugin-kan-ban-niang": "^1.0.5",
+    "@vuepress-reco/vuepress-plugin-loading-page": "^1.6.0",
+    "@vuepress/plugin-medium-zoom": "^1.8.0",
+    "vuepress": "^1.8.0",
+    "vuepress-plugin-cursor-effects": "^1.0.0",
+    "vuepress-plugin-dynamic-title": "^1.0.0"
+  },
+  "dependencies": {
+    "vuepress-plugin-flowchart": "^1.4.3",
+    "vuepress-theme-reco": "^1.6.1"
+  }
+}
