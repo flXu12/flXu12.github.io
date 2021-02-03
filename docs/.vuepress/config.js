@@ -48,7 +48,7 @@ module.exports = {
       "dynamic-title",
       {
         showIcon: "/favicon.ico",
-        showText: "(/≧▽≦/)老板好！",
+        showText: "(/≧▽≦/)哈喽～",
         hideIcon: "/failure.ico",
         hideText: "(●—●)快快回来！",
         recoverTime: 2000
