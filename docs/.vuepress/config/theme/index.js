@@ -9,5 +9,7 @@ module.exports = Object.assign({}, themeReco, {
   search: true,
   searchMaxSuggestions: 10,
   // 自动形成侧边导航
-  sidebar: 'auto'
+  sidebar: 'auto',
+  // 不显示404公益广告
+  noFoundPageByTencent: false
 })

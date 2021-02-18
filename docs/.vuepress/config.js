@@ -1,7 +1,7 @@
 const themeConfig = require('./config/theme/index.js');
 
 module.exports = {
-  base: './',
+  base: '/',
   title: 'Day Day Up',
   description: '最好的时候，就是当下。',
   head: [
