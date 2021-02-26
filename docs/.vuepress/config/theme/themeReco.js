@@ -18,7 +18,7 @@ module.exports = {
   markdown: {
     lineNumbers: true,  // 代码显示行号
   },
-  lastUpdated: 'Last Updated',  // 最后更新时间
+  lastUpdated: 'Last Updated',  // 最后更新时间(展示在文章右下角，github时区比提交时间早8小时，应该使用UTC+8时区)
   author: 'flXu',
   // record: 'xxxx',  // 备案号
   startYear: '2021',  // 项目开始时间
