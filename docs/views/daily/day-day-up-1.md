@@ -1,5 +1,5 @@
 ---
-title: 【day day up系列】2021年3月学习日记
+title: 【day day up系列】2021年2月学习日记
 date: 2021-02-22
 categories:
  - 日常
@@ -129,7 +129,7 @@ OS: vue官网每句话都值得推敲。
 
 1. 对象字面量（Object literals）
 
-字面量是由语法表达式定义的常量。对西那个字面值是封闭在花括号对{}中的一个对象的0个或多个“属性名-值”对的列表。
+字面量是由语法表达式定义的常量。对象字面值是封闭在花括号对{}中的一个对象的0个或多个“属性名-值”对的列表。
 ```js
 const student = {
   name: 'abai Xu',
@@ -174,6 +174,7 @@ const func2 = (name) => {
 - 普通函数的作用域是其运行时的上下文环境，二箭头函数的作用于是其定义时的上下文环境，所以this的指向不同。
 
 3. 解构赋值（ES6）
+
 ES6允许按照一定模式，从**数组**和**对象**中提取值，对变量进行赋值。
 ```js
 // 一般变量赋值
@@ -216,8 +217,47 @@ func2({x: 3}); // [3, 1]
 func2(); // [0, 1]
 ```
 
-4. 扩展运算符
-6. 模板字符串（ES6）
+4. rest参数与扩展运算符（spread）（ES6）
+
+**rest参数：** 形式为...变量名。将数量不确定的参数放入数组中，用于获取函数的多余参数。
+```js
+// 参数求和——arguments写法
+function sum() {
+  let result = 0;
+  for(let i = 0; i < arguments.length; i++) {
+    result += arguments[i];
+  }
+  return result;
+}
+// 调用
+sum(1,2,3); // 6
+
+// 参数求和——rest参数写法
+function sum(...arr) {
+  let result = 0;
+  for(let i of arr) {
+    result += i;
+  }
+  return result;
+}
+// 调用
+sum([1,2,3]); // 6
+```
+另一个例子：
+```js
+// arguments是一个累数组对象，因此无法直接使用数组方法。
+function sort() {
+  return Array.prototype.slice.call(arguments).sort();
+}
+
+// rest参数写法
+function sort(...arr) {
+  return arr.sort();
+}
+```
+**扩展运算符：** 好比rest参数的逆运算，将一个数组转为用都好分隔的参数序列。
+
+5. 模板字符串（ES6）
 ```js
 // 普通写法
 const text1 = 'my name is ' + obj.a + ', I am a coder'; // 单行
@@ -228,14 +268,37 @@ const text1 = `my name is ${obj.a}, I am a coder`;
 const text2 =  `my name is ${obj.a},
 I am a coder`;
 ```
+6. ES6 Class
 
-7. 多行字符串
-8. 拆包表达式
-9. ES6 Class
-10. 模块化
+JavaScript中，生成实例对象的传统方法是通过构造函数。
 
-## 5. $event接口【todo】
+class的本质是function，让对象原型的写法更加清晰，更像面向对象编程的语法。
+```js
+// 构造函数写法
+function Point(x, y) {
+  this.x = x;
+  this.y = y;
+}
+Point.prototype.toString = function() {
+  return '(' + this.x + ',' + this.y + ')';
+}
+// 使用new关键字生成实例
+const p = new Point(1,2);
 
-# 2021年3月小记
+// class写法
+class point {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+
+  toString() {
+    return '(' + this.x + ',' + this.y + ')';
+  }
+}
+// 使用new关键字生成实例
+const p = new Point(1,2);
+```
+
 
 
