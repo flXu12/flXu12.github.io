@@ -300,5 +300,29 @@ class point {
 const p = new Point(1,2);
 ```
 
+## 5. 开发依赖 vs 生产依赖
+**开发环境：**
+项目尚在编码阶段时的环境。代码中可能还有各种console.log、注释、格式化等。
+
+**生产环境：**
+项目已经完成编码，并发布上线可供用户浏览的阶段时的环境。代码可能经过了压缩、优化等处理。
+
+**开发依赖/运行依赖（devDependencies）：**
+只在开发阶段需要，一旦项目投入使用，便不再依赖这些库，不会被打入包内.
+```bash
+# 安装方式：
+npm install <packageName> --save-dev
+
+yarn add <packageName> -D
+```
+
+**生产依赖（dependencies）：**
+不仅在开发环境中需要使用，在项目投入使用时，仍然需要的依赖。
+```bash
+# 安装方式：
+npm install <packageName> --save
+
+yarn add <packageName>
+```
 
 
