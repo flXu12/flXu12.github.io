@@ -86,4 +86,65 @@ Composition API，即组合式API，是vue3提出的一个新概念，能做到�
   - ref用于创建值类型的响应式；reactive用于创建对象类型的响应式。
   - ref的更新方式通过修改xxx.value进行；reactive的更新需要通过toRefs方法转换从而使每个属性都具备响应式。
 
-## 2. 页面导入样式比较：link vs @import【todo】
+## 2. 页面导入样式比较：link vs @import
+在html文档中，css有四种引入方式：
+
+1. 内联样式（行内样式）：在html标签的style属性中添加样式
+```html
+<div style="color: red">这是一段红色的文字</div>
+```
+2. 嵌入样式：在style标签中添加样式
+```html
+<head>
+  <style>
+    .aaa {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <div class="aaa">这是一段红色的文字</div>
+</body>
+```
+3. 链接样式：在head标签中通过link添加样式
+```css
+ /* aaa.css文件 */
+.aaa {
+  color: red;
+}
+```
+```html
+<head>
+  <link ref="stylesheet" type="text/css" href="./aaa.css">
+</head>
+<body>
+  <div class="aaa">这是一段红色的文字</div>
+</body>
+```
+4. 导入样式：在style标签中使用CSS规则引入外部样式文件，或者在.css 样式文件中引入外部样式文件
+```html
+<head>
+  <style>
+    @import url('./aaa.css');
+  </style>
+</head>
+<body>
+  <div class="aaa">这是一段红色的文字</div>
+</body>
+```
+PS: css文件中也可以引入外部样式文件
+```css
+@import url('./bbb.css');
+
+.aaa {
+  color: red;
+}
+```
+外部引入样式的方式有两种，即link标签和@import引入。
+
+**link vs @import**：
+
+- @import是css提供的，只能加载css；link除了加载css外，还可以定义RSS等其他事务。
+- **兼容性**：@import是CSS2.1提出的，低版本浏览器（IE5以下）不支持；link是XHTML标签，无兼容问题。
+- **加载顺序**：@import引入的样式需等页面加载完成后再加载（所以可能出现页面一开始没有css样式，在网速慢的情况下可能出现页面闪烁一下后样式正常的现象）；link引入的样式在页面载入的同时加载；
+- **DOM操作**：link支持通过JS控制DOM来改变样式（通过DOM操作插入link标签，从而引入样式）；@import不支持（因为无法获取DOM）
