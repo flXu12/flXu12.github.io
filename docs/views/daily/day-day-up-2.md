@@ -150,3 +150,36 @@ PS: css文件中也可以引入外部样式文件
 - **兼容性**：@import是CSS2.1提出的，低版本浏览器（IE5以下）不支持；link是XHTML标签，无兼容问题。
 - **加载顺序**：@import引入的样式需等页面加载完成后再加载（所以可能出现页面一开始没有css样式，在网速慢的情况下可能出现页面闪烁一下后样式正常的现象）；link引入的样式在页面载入的同时加载；
 - **DOM操作**：link支持通过JS控制DOM来改变样式（通过DOM操作插入link标签，从而引入样式）；@import不支持（因为无法获取DOM）
+
+## 3. Array(100).map(x=>1)结果是多少？
+在真正执行这段语句之前我以为的是输出结果为100各元素为1的数组，然而事实是输出了长度为100的空数组。
+
+![](../images/daily-003.PNG)
+
+来扫盲吧~
+
+关键词：Array构造器、Array.prototype.map()。
+
+### Array构造器
+Array构造器会根据指定的元素创建一个数组；当仅有一个元素且类型为数字时，会创建一个指定长度的数组。**<font color="#0000dd">言外之意就是该数组此时不包含任何实际元素，更不能认为它是一个包含了指定个数的undefined的元素。</font>**
+
+### Array.prototype.map()
+map方法会给原数组中的每个元素按顺序调用一次callback函数，callback函数执行后返回的值组合形成一个新数组。**<font color="#0000dd">callback函数只会在有值的索引上被调用；没有被赋过值或者使用delete删除的索引不会被调用。</font>**
+
+### 结论
+由以上两点基本可以找到输出为一个长度为100的数组的原因了，使用Array(100)构造函数生成的数组并没有对其中的数组元素进行赋值；map方法不会被未赋值的数组元素调用。因此Array(100).map(item => 1)中的callback实际上一次都没有被调用过。来验证下吧：
+```js
+var a = undefined, b = null;  // 虽然值为falsy，但实际被赋过值的变量
+var c = Array(3); // 创建长度为3的数组，数组元素未被赋值
+c.push(a, b); // 现在数组的前三个元素未被赋值，后俩元素被赋值了
+var d = c.map(item => 1);
+console.log(d);
+
+// 为了更好看到map被调用的情况，看看另一个map,在map中写下打印语句
+var e = c.map((item, index) => {
+  console.log(index);
+  return 1;
+});
+console.log(e);
+```
+![](../images/daily-004.png)
