@@ -8,6 +8,8 @@ tags:
 siderbar: auto
 ---
 
+> 生活就是这样，会慢慢磨平你的棱角，或使你成为一颗璞玉，前提是你耐得住打磨，忍得了寂寞。
+
 ## 1. Vue3 Composition API: ref vs reactive
 Composition API，即组合式API，是vue3提出的一个新概念，能做到一个独立的逻辑关注点相关的代码在同一个地方进行集中管理。
 
