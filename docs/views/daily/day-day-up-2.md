@@ -228,3 +228,48 @@ function(num1, num2) {
 - 0.1+0.1并不是精确地等于0.2，而是因为其经过二进制计算后转换成十进制时在精度范围内最接近的数字是0.2
 - 浮点数的计算精度丢失可能发生在以下步骤：进制转换（十进制to二进制、二进制to十进制）；对阶运算
 - 浮点数的计算精度问题解决：将小数转换成整数后进行计算；借助第三方库（math.js、big.js）
+
+## 5. 函数如何增加自定义参数而不覆盖原本的默认参数
+日常开发中，我们有时会碰到组件库提供的事件中的默认参数无法满足我们的需求，需要额外传入自定义参数的情况。
+
+以下以element ui库的table组件为例，来看看代码吧！
+
+```vue
+<template>
+  <el-table
+    @selection-change="selectionChange"
+    @select-all="selectAll($event, 'abc')"
+    @cell-click="(row, column) => { cellClick(row, column, 'abc') }"
+  >
+    <el-table-column>xxx</el-table-column>
+  </el-table>
+</template>
+<script>
+export default {
+  methods: {
+    // 当选择项发生变化时会触发改时间，默认参数为selection
+    selectionChange(selection) {
+      console.log(selection); // 输出为实际selection数据
+    },
+
+    // 当用户手动全选checkbox时触发的时间，默认参数为selection，但是这里多传了一个自定义参数params
+    selectAll(event, params) {
+      console.log(event, params); // 输出selection数据，'abc'
+    },
+
+    // 当某个单元格被点击时触发该事件，默认参数为row, column, cell, event; 这里前端使用闭包重新定义了该事件，裁掉了无用的默认参数，多传了一个自定义参数params
+    cellClick(row, column, params) {
+      console.log(row, column, params); // 输出row数据，column数据，'abc'
+    }
+  }
+}
+</script>
+```
+
+**总结**：
+
+1. 无自定义参数时，在template中直接写方法名即可，参考@selection-change="selectionChange"
+2. 有自定义参数且仅有一个默认参数时，需要给方法传参，$event表示默认参数，参考@select-all="selectAll($event, 'abc')"
+3. 有自定义参数且有多个默认参数时，需要使用闭包的方式对默认方法进行改写，参考@cell-click="(row, column) => { cellClick(row, column, 'abc')}"
+
+## 6. 如何定义一个事件？
