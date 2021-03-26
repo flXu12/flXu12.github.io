@@ -272,4 +272,6 @@ export default {
 2. 有自定义参数且仅有一个默认参数时，需要给方法传参，$event表示默认参数，参考@select-all="selectAll($event, 'abc')"
 3. 有自定义参数且有多个默认参数时，需要使用闭包的方式对默认方法进行改写，参考@cell-click="(row, column) => { cellClick(row, column, 'abc')}"
 
-## 6. 如何定义一个事件？
+## 6. 如何定义一个事件？【todo】
+
+## 7. 文本省略【todo】
