@@ -275,3 +275,5 @@ export default {
 ## 6. 如何定义一个事件？【todo】
 
 ## 7. 文本省略【todo】
+
+## 8. css绘制一个三角形【todo】
