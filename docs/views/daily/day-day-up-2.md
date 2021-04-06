@@ -272,7 +272,61 @@ export default {
 2. 有自定义参数且仅有一个默认参数时，需要给方法传参，$event表示默认参数，参考@select-all="selectAll($event, 'abc')"
 3. 有自定义参数且有多个默认参数时，需要使用闭包的方式对默认方法进行改写，参考@cell-click="(row, column) => { cellClick(row, column, 'abc')}"
 
-## 6. 如何定义一个事件？【todo】
+## 6. 【vue】如何定义一个事件？
+Vue实例提供了一个自定义事件的系统，对于父子组件之间的通信场景，使父组件可以像处理原生DOM事件一样，通过v-on监听自组件实例中的任何事件。
+
+```vue
+// 父组件
+<template>
+  <div>
+    <h1>我是父组件，点击子组件后，数字是：{{ number }}</h1>
+    <child v-on:update-number="updateNumber" />
+    <!--等同于-->
+    <child @update-number="updateNumber" />
+  </div>
+</template>
+<script>
+  import Child from './child.vue';
+
+  export default {
+    components: {
+      Child
+    },
+    data() {
+      return {
+        number: null
+      }
+    },
+    methods: {
+      // 接收自组件传过来的参数number
+      updateNumber(number) {  
+        this.number = number * 2
+      }
+    }
+  }
+</script>
+```
+```vue
+// 子组件child.vue
+<template>
+  <div>
+    <h1>我是子组件，点击下方按钮时，会随机产生一个数字，并将此数字作为参数传递给父组件</h1>
+    <button @click="handleClick">点我点我</button>
+  </div>
+</template>
+
+<script>
+  export default {
+    methods: {
+      handleClick() {
+        const number = Math.floor(Math.random() * 100);
+        // 通过this.$emit触发父组件的@update-number事件，并传递参数number
+        this.$emit('update-number', number);
+      }
+    }
+  }
+</script>
+```
 
 ## 7. 文本省略【todo】
 
