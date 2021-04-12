@@ -12,11 +12,11 @@ siderbar: auto
 
 ## Promise源码实现
 
-**<font color="#0000dd">1. Promise解决了什么问题？</font>**
+### 1. Promise解决了什么问题？
 
 Promise解决了回调地狱的问题。
 
-**<font color="#0000dd">2. 什么是回调地狱（callback hell）？</font>**
+### 2. 什么是回调地狱（callback hell）？
 
 js是单线程的同步操作，也就是说每次只能执行一个任务；对于I/O操作、网络请求、定时任务等异步操作，通常的处理方式是将其放入回调函数中执行。来看看回调函数的定义：
 
@@ -56,7 +56,7 @@ funcA(function(resA) {
 })
 ```
 
-**<font color="#0000dd">3. 怎么解决回调地狱？</font>**
+### 3. 怎么解决回调地狱？
 
 1. 好的编码习惯：代码简洁，尽量避免使用匿名函数；
 2. 模块化：拆分独立的功能函数，通过import导入；
@@ -86,7 +86,7 @@ funcA()
   })
 ```
 
-**<font color="#0000dd">4. Promise常用的API有哪些？</font>**
+### 4. Promise常用的API有哪些？
 
 ```js
 // 1. Promise.resolve(value)  返回一个以给定值解析后的Promise对象
@@ -154,12 +154,65 @@ Promise.allSettled([promise1, promise2]).then(res => {
 });
 ```
 
-**<font color="#0000dd">5. 手写代码实现Promise</font>**
+### 5. Promise的执行过程是怎么样的？
 
-**<font color="#0000dd">Promise的执行过程是怎么样的？</font>**
+Promise有三种状态：
+- pending
+- resolved
+- rejected
+
+Promise状态变化只有两种情况：
+- pending -> resolved
+- pending -> rejected
 
 **<font color="#0000dd">Promise的缺点是啥？如何解决？</font>**
 
-```js
+**<font color="#0000dd">手写代码实现Promise</font>**
 
+**<font color="#0000dd">第一步，我们来定义Promise类：</font>**
+```js
+class Promise {
+  // 构造器
+  constructor(executor) {}, 
+  // 方法
+  then(onResolved, onRejected) {},
+  catch(onRejected) {},
+  // 静态方法
+  static resolve(value) {},
+  static reject(reason) {},
+  // 等等
+}
 ```
+**<font color="#0000dd">第二步，构造函数实现：</font>**
+我们在声明一个promise的时候通常是这么干的：
+```js
+const promise = new Promise((resolve, reject) => {
+  // do something
+})
+```
+Promise的构造器的参数是一个函数（名为executor），该函数接收两个参数，切这俩参数都是函数类型，用于修改promise状态：
+```js
+class Promise {
+  // 构造器
+  constructor(executor) {
+    this.value = undefined;
+    this.status = 'pending';
+    executor(value => {
+      this.value = value;
+      this.status = 'resolved';
+    }, reason => {
+      this.value = reason;
+      this.status = 'rejected';
+    })
+  },
+  // 方法
+  then(onResolved, onRejected) {},
+  catch(onRejected) {},
+  // 静态方法
+  static resolve(value) {},
+  static reject(reason) {},
+  // 等等
+}
+```
+**<font color="#0000dd">第三步，then实现：</font>**
+then通过handler接收值，它有两个handler，分别是onRejected和onResolved
