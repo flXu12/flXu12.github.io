@@ -158,11 +158,11 @@ Promise.allSettled([promise1, promise2]).then(res => {
 
 Promise有三种状态：
 - pending
-- resolved
+- fulfilled
 - rejected
 
 Promise状态变化只有两种情况：
-- pending -> resolved
+- pending -> fulfilled
 - pending -> rejected
 
 **<font color="#0000dd">Promise的缺点是啥？如何解决？</font>**
@@ -192,18 +192,43 @@ const promise = new Promise((resolve, reject) => {
 ```
 Promise的构造器的参数是一个函数（名为executor），该函数接收两个参数，切这俩参数都是函数类型，用于修改promise状态：
 ```js
+// 声明三种常量，分别对应Promise的三种状态
+const PENDING = 'PENDING';
+const FULFILLED = 'FULFILLED';
+const REJECTED = 'REJECTED';
+
 class Promise {
   // 构造器
   constructor(executor) {
+    if(!isFunction(executor)) {
+      throw new Error('Promise构造器的参数必须是一个函数')
+    }
+    // 添加初始状态和值
     this.value = undefined;
-    this.status = 'pending';
-    executor(value => {
-      this.value = value;
-      this.status = 'resolved';
-    }, reason => {
-      this.value = reason;
-      this.status = 'rejected';
-    })
+    this.status = PENDING;
+
+    // resolve
+    const resolve = value => {
+      if(this.status === PENDING) {
+        this.status = FULFILLED;
+        this.value = value;
+      }
+    }
+
+    // reject
+    const reject = reason => {
+      if(this.status === PENDGIN) {
+        this.status = REJECTED;
+        this.value = reason;
+      }
+    }
+
+    // 执行Promise构造器中的函数
+    try {
+      executor(resolve, reject);
+    } catch(err) {
+      reject(err);
+    }
   },
   // 方法
   then(onResolved, onRejected) {},
@@ -213,6 +238,55 @@ class Promise {
   static reject(reason) {},
   // 等等
 }
+
+// 判断变量是否为函数
+const isFunction = variable => typeof variable === 'function';
 ```
 **<font color="#0000dd">第三步，then实现：</font>**
-then通过handler接收值，它有两个handler，分别是onRejected和onResolved
+then通过handler接收值，它有两个handler，分别是onRejected和onResolved。需要注意的是，then函数本身是同步的，但是then里面的callback是异步的，callback会被放到微队列中。
+```js
+// 声明三种常量，分别对应Promise的三种状态
+const PENDING = 'PENDING';
+const FULFILLED = 'FULFILLED';
+const REJECTED = 'REJECTED';
+
+class Promise {
+  // 构造器
+  constructor(executor) {
+    if(!isFunction(executor)) {
+      throw new Error('Promise构造器的参数必须是一个函数');
+    }
+    // 添加初始状态和值
+    this.value = undefined;
+    this.status = PENDING;
+
+    // resolve
+    const resolve = value => {
+      if(this.status === PENDING) {
+        this.value = value;
+        this.status = FULFILLED;
+      }
+    }
+
+    // reject
+    const reject = reason => {
+      if(this.status === PENDING) {
+        this.value = reason;
+        this.status = REJECTED;
+      }
+    }
+
+    // 执行Promise构造器中的函数
+    try {
+      executor(resolve, reject);
+    } catch(err) {
+      reject(err);
+    }
+  },
+
+  // 方法
+  then(onResolved, onRejected) {},
+  catch(onRejected) {},
+
+}
+```
