@@ -47,3 +47,5 @@ promise2 = promise1.then(onFulfilled, onRejected)
 
 ### 2.3 Promise解决过程
 Promise解决过程是一个抽象操作，需要输入一个promise和一个value，我们用[[Resolve]](promise, x)来表示。如果x是thenable类型且看上去想一个promise，则解决程序会使用promise接受x的状态，否则使用x的值来执行promise。
+
+只要then方法符合Promise/A+规范，那么thenable的处理就更加具备通用性；同时也能让Promise/A+规范的实现可以与那些不太规范但是可用的实现能良好共存。
