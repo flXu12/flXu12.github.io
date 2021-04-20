@@ -10,4 +10,8 @@ siderbar: auto
 
 > 热爱生活，往心之所向那里去。
 
-## 1. 
+## 1. console.dir()
+在控制台显示指定JavaScript对象的属性，并通过类似文件树样式的交互列表显示。
+![](../images/daily-006.png)
+
+![](../images/daily-007.png)
