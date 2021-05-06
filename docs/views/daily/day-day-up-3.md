@@ -1,5 +1,5 @@
 ---
-title: 【day day up系列】2021年4月学习日记
+title: 【day day up系列】2021年4月学习笔记
 date: 2021-04-11
 categories:
  - 日常
@@ -77,7 +77,7 @@ if(true) {
 
  > 本段内容参考了这篇文章：[QUIC 和 HTTP/3 队头阻塞的细节](https://github.com/rmarx/holblocking-blogpost/blob/master/README_CN.md)
 
- ## 3. void 0 VS undefined
+## 4. void 0 VS undefined
 最近在学习工具库的代码，发现了一些对我来说不太常规的码，形如：
 ```js
 // 初始化某个变量取值为undefined
@@ -112,4 +112,4 @@ console.log(undefined);
 为嘛用void 0，而不是void 'abc',void []呢？   
 因为void 0写起来更简便，能节省字节大小。在许多JavaScript压缩工具中，还会用void 0去代替代码中的undefined。
 
-【当函数返回值不会被使用的时候，应该使用void运算符，确保返回undefined。】
+> 当函数返回值不会被使用的时候，应该使用void运算符，确保返回undefined。

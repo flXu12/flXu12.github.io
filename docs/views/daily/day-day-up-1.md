@@ -1,5 +1,5 @@
 ---
-title: 【day day up系列】2021年2月学习日记
+title: 【day day up系列】2021年2月学习笔记
 date: 2021-02-22
 categories:
  - 日常
