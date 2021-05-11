@@ -287,6 +287,6 @@ class Promise {
   // 方法
   then(onResolved, onRejected) {},
   catch(onRejected) {},
-
+  
 }
 ```
