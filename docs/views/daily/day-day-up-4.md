@@ -20,3 +20,6 @@ siderbar: auto
 TODO：webpack与rollup打包小实践
 
 ## 2. DSL模板
+
+## 3. cookie, sessionStorage, localStorage
+**<font color="#0000dd">为什么不用sessionStorage来存储用户信息？</font>**：[sessionStorage的数据能否在多标签页共享，取决于标签页如何打开](https://github.com/lmk123/blog/issues/66)
