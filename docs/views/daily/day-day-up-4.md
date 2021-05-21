@@ -92,12 +92,230 @@ require('npm-B/npm-B.css');
 import './style.css';
 ```
 
-## 3. DSL模板
-DSL(Domain Specific Language, 为特定领域设计的专用语言)
+## 3. DSL
+> DSL通过在表达能力上做的妥协换取在某一领域内的高效。  
+DSL(Domain Specific Language), 定义是：为特定领域设计的专用语言。如SQL、JSON、正则表达式等都是DSL。  
+与DSL对应的另一种预研是GPL(General Purpose Language)，即通用编程语言。如C、Java、JavaScript等。  
+DSL分类：  
+  1. 内部DSL： 前端比较熟悉的就是jQuery库等，我们知道jQuery的实现是基于JavaScript语言，但是在使用时又自成一种新的语法风格。  
+  ```js
+  $('#app').find('button').html('hahahha');
+  ```  
+  2. 外部DSL：是一种独立的编程语言或者规范语言，一般具备特定的语法。前端常用的如HTML、CSS、JSX等都是外部DSL。
+  ```html
+  <div>
+    <h1>我是一级标题</h1>
+  </div>
+  ```  
+  3. 语言工作台(Language Workbench)：是一种专用的IDE，可以将DSL可视化，并且支持定义和构建一个DSL。如前端常用的vscode、可视化搭建工具等。
 
-## 4. cookie, sessionStorage, localStorage
-**<font color="#0000dd">为什么不用sessionStorage来存储用户信息？</font>**：[sessionStorage的数据能否在多标签页共享，取决于标签页如何打开](https://github.com/lmk123/blog/issues/66)
+## 4. 使用cookie, sessionStorage, localStorage鉴权
+这里主要是针对在实践中踩过坑的方面进行阐述，毕竟这三个关键字google一下，随便一篇文章都能比我这里讲得详细并且通俗易懂~  
+还原踩坑现场：  
+一般项目都需要用户鉴权，通常的实现方案是：配置一个登录页，前端通过向服务端发送用户名、密码、验证码等方式获取一个有效token，并且在后续所有的接口请求中携带该token进行API请求。服务端需要做的是验证该token的有效性，并返回该用户对应的数据响应。  
 
-## 5. Scheme
+那么问题来了：  
+已知当前系统的认证方式是：login后取得的token存储在localstorage，在请求拦截中给请求头赋值token（从localstorage中取得），由于还存在一些公共组件内的API需要在query上添加token参数，因此这里的token也是从localstorage中拿到的。  
+```js
+// token的存取
+Object.defineProperty(this, 'token', {
+  get() {
+    return window.localStorage['token'];
+  },
+  set(value) {
+    window.localStorage['token'] = value;
+  },
+  enumerable: true,
+  configurable: true,
+})
+
+// 请求拦截
+axios.interceptors.request.use(
+  // 在发送请求前做些什么，如参数序列化、添加统一token等
+  function(config) {
+    const params = {
+      token: this.token
+    }
+    // 统一在参数中添加token
+    if(config.method === 'get') {
+      config.params = config.params || {};
+      Object.assign(config.params, params);
+    } else {
+      config.data = config.data || {};
+      Object.assign(config.data, params);
+    }
+    return config;
+  },
+  // 对请求错误的处理
+  function(error) {
+    return Promise.reject(error);
+  }
+)
+``` 
+现在，用户反馈了一个需求，希望登录系统后，关闭浏览器窗口再重新打开窗口，并输入系统的url，此时重新走一次登录页面。原因是：防止不同人使用同一台计算机时，前者未退出而是关闭窗口后，后者可以通过输入url篡改该系统数据。  
+对于这种场景，其实根源就是需要监听浏览器窗口关闭事件，在窗口关闭的时候清空存储在localtorage中的token即可。  
+```js
+window.onbeforeunload = function() {
+  this.token = null;
+}
+```  
+**<font color="#ff0000">注意啦，上述操作是有问题的！</font>**就这么监听下窗口的关闭事件，然后清除token就真的能达到目的吗？显然不可能，并且还会误伤。  
+首先，我们来看看window.onbeforeunload的定义：当窗口即将被卸载（关闭）时，会触发该事件，此时页面文档依然可见，且该事件的默认动作可以被取消。也就是说，这个事件给了你在窗口关闭前能做一些事情的时机，但是用户可以选在取消呀！这样就会导致当你清除token以后，用户选择取消关闭时，或者刷新页面时，发现token失效了，退回到登录页，一脸懵逼。。。非常影响用户体验。  
+这个时候，我们再来看看会话级别的sessionStorage能否实现我们的需求呢？sessionStorage中存储的数据会在页面会话结束时被清除。  
+![](../images/daily-012.png)   
+需要注意的是：  
+- 页面会话在浏览器打开期间一直保持，并且重新加载或恢复页面仍会保持原来的页面会话。（通俗点讲：我在sessionStorage中存了一个aaa的数据，然后刷新页面，或者关闭该tab页后，再通过历史记录重新打开，这个aaa的数据仍会在sessionStorage中）
+- 通过手动输入的相同url打开的tab页面，会创建个字的sessionStorage。（通俗点讲：手动输入的url不会与其同名tab页共享sessionStorage，比如我开了https://aaa.com，设置的sessionStorage的aaa值，然后新开一个页面，手动输入https://aaa.com并回车，发现这个页面的sessionStorage中没有aaa）
+- 关闭浏览器窗口/tab，会清除对应的sessionStorage
+- 在新标签或窗口打开一个页面时，会复制顶级浏览器会话的上下文作为新会话的上下文。（通俗点讲：页面A设置了sessionStorage的aaa，然后从页面A点击某个按钮或链接，新开了一个新的窗口B或者新的tab页B，此时B的sessionStorage中也会有aaa）  
+
+Okay，既然sessionStorage的特性就是关闭窗口即清除token，那么这样是不是就能满足用户的需求呢？我们来试试：
+```html
+<!-- 这个是第一个html页面，名为aaa，点击按钮会打开bbb -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>sessionStorage测试</title>
+</head>
+<body>
+  <div>
+    这里是页面A，在sessionStorage中设置了aaa = 'aaa';
+  </div>
+  <div>
+    <button onclick="handleClick()">点击按钮打开新tab页面B</button>
+  </div>
+</body>
+<script>
+  window.onload = function() {
+    window.sessionStorage.setItem('aaa', 'aaa');
+  }
+  function handleClick() {
+    window.open('./bbb.html');
+  }
+</script>
+</html>
+```
+
+```html
+<!-- 这是第二个html页面bbb，点击按钮打开页面ccc -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>sessionStorage测试</title>
+</head>
+<body>
+  <div>
+    这里是页面B，在sessionStorage中设置了bbb = 'bbb';
+  </div>
+  <button onclick="handleClick()">点击跳到页面C</button>
+</body>
+<script>
+  window.onload = function() {
+    window.sessionStorage.setItem('bbb', 'bbb');
+  }
+  function handleClick() {
+    window.open('./ccc.html')
+  }
+</script>
+</html>
+```
+
+```html
+<!-- 这是页面ccc -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>sessionStorage测试</title>
+</head>
+<body>
+  <div>
+    这里是页面C
+  </div>
+</body>
+</html>
+```
+
+首先我们预测一下打开aaa > bbb > ccc的时候sessionStorage的变化吧，按照sessionStorage的特性来看，在新标签或窗口打开一个页面时，会复制顶级浏览器会话的上下文作为新会话的上下文。预测结果如下：
+| 页面 | sessionStorage |
+| ----- | ----- | 
+| aaa.html | { aaa: 'aaa' } |
+| bbb.html | { aaa: 'aaa', bbb: 'bbb' } |
+| ccc.html | { aaa: 'aaa' } |
+
+来看看效果：  
+![](../images/daily-001.gif)   
+
+实际结果是：  
+| 页面 | sessionStorage |
+| ----- | ----- | 
+| aaa.html | { aaa: 'aaa' } |
+| bbb.html | { aaa: 'aaa', bbb: 'bbb' } |
+| ccc.html | { aaa: 'aaa', bbb: 'bbb' } |  
+也就是说，**从当前页面点击按钮打开的新页面会复制父页面的sessionStorage** ，而不是所谓的根节点对应的"祖先页面"。  
+
+也许我们可以尝试下以其他方式来打开新页面呢，比如a标签试试看，这里只需要修改aaa.html页面如下：  
+```html
+<!-- 这个是第一个html页面，名为aaa，点击链接会打开bbb -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>sessionStorage测试</title>
+</head>
+<body>
+  <div>
+    这里是页面A，在sessionStorage中设置了aaa = 'aaa';
+  </div>
+  <div>
+    <a href="./bbb.html" target="_blank">点击链接跳到页面B</a>
+  </div>
+</body>
+<script>
+  window.onload = function() {
+    window.sessionStorage.setItem('aaa', 'aaa');
+  }
+  function handleClick() {
+    window.open('./bbb.html');
+  }
+</script>
+</html>
+```  
+
+再来测一波~  
+![](../images/daily-002.gif)  
+嗯？跟想象的不太一样呀。实际结果是通过a标签打开的新页面，不会复制父页面的sessionStorage呢：  
+| 页面 | sessionStorage |
+| ----- | ----- | 
+| aaa.html | { aaa: 'aaa' } |
+| bbb.html | { bbb: 'bbb' } |
+| ccc.html | { bbb: 'bbb' } |   
+
+查找相关信息发现是因为：**Chrome更新89版本后，a标签target="_blank"跳转丢失sessionStorage**，提供了以下解决方案：  
+1. 给a标签加一个属性：rel="opener"
+2. 将a标签换成window.open
+3. 更换其他存储方式如cookie或localStorage  
+
+前面已经尝试过window.open是可行的，现在我们来测测给a标签加上rel="opener"属性试试：  
+![](../images/daily-003.gif)  
+棒，可行~
+
+现在看起来sessionStorage貌似可以满足用户的需求呢，但是我们最终并没有采用这个方案，而是将token存储在cookie中。  
+**<font color="#0000dd">为什么不用sessionStorage来存储token？</font>**：[sessionStorage的数据能否在多标签页共享，取决于标签页如何打开](https://github.com/lmk123/blog/issues/66)
+
+## 7. a标签的rel属性
+【https://segmentfault.com/a/1190000039662920】
+
+## 6. Scheme
 Scheme是一种函数式编程语言，是Lisp的两种主要方言之一（另一种为Common Lisp）。  
 Scheme的哲学是：设计计算机语言不应该进行功能的堆砌，而应该尽可能减少弱点和限制，使剩下的功能显得必要。
