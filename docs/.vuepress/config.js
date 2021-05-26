@@ -16,9 +16,20 @@ module.exports = {
     lineNumbers: true
   },
   plugins: [
-    '@vuepress/medium-zoom',
     'flowchart',
     '@vuepress-reco/vuepress-plugin-loading-page',
+    // 点击图片放大
+    [
+      '@vuepress/plugin-medium-zoom', {
+        selector: '.page img', // 页面元素选择器。页面的class为page，所有图片资源标签为img
+        delay: 1000,
+        options: {
+          margin: 24,
+          background: 'rgba(25, 18, 25, 0.9)',
+          scrollOffset: 40
+        }
+      }
+    ],
     // 看板娘
     [
       "@vuepress-reco/vuepress-plugin-kan-ban-niang",
