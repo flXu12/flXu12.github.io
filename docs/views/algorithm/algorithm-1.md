@@ -1,5 +1,5 @@
 ---
-title: 排序算法-1
+title: 排序算法合集
 date: 2021-05-17
 categories:
  - 算法
@@ -79,5 +79,39 @@ function quickSort(array) {
     }
   }
   return quickSort(leftArray).concat([pivot], quickSort(rightArray))
+}
+```
+
+## 3. 希尔排序（ShellSort）
+希尔排序又称缩小增量排序，属于一种插入排序，不同之处在于它会有限比较距离较远的元素。  
+**【思路说明】**  
+将整个待排序记录序列分割成若干个子序列，然后对每一个子序列进行直接插入排序：  
+1. 先取一个正整数d1,所有距离为d1倍数的元素放到一个组，然后在各自组内进行插入排序；
+2. 取d2(d2 < d1)
+3. 重复上述分组和排序操作，直到di = 1，即所有元素个自成一组，最后对这个组进行插入排序。  
+**【复杂度说明】**  
+- 空间复杂度为O(1)
+- 时间复杂度不稳定，取决于增量序列函数  
+**【代码实现】**  
+```js
+function shellSort(array) {
+  if(array.length < 2) { return array; }
+  var gap = Math.floor(array.length / 2);
+  var tmp;
+  while(gap) {
+    for(var i = gap; i < array.length; i++) {
+      tmp = array[i];
+      for(var j = i - gap; j >= 0; j -= gap) {
+        if(array[j] > tmp) {
+          array[j + gap] = array[j];
+        } else {
+          break;
+        }
+      }
+      array[j + gap] = tmp;
+    }
+    gap = Math.floor(gap / 2);
+  }
+  return array;
 }
 ```
