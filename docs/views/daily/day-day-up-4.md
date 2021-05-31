@@ -311,11 +311,51 @@ Okay，既然sessionStorage的特性就是关闭窗口即清除token，那么这
 棒，可行~
 
 现在看起来sessionStorage貌似可以满足用户的需求呢，但是我们最终并没有采用这个方案，而是将token存储在cookie中。  
-**<font color="#0000dd">为什么不用sessionStorage来存储token？</font>**：[sessionStorage的数据能否在多标签页共享，取决于标签页如何打开](https://github.com/lmk123/blog/issues/66)
+**<font color="#0000dd">为什么不用sessionStorage来存储token？</font>**：来看看这篇文章 =>     [sessionStorage的数据能否在多标签页共享，取决于标签页如何打开](https://github.com/lmk123/blog/issues/66)
 
-## 7. a标签的rel属性
-【https://segmentfault.com/a/1190000039662920】
+## 5. ES2020新特性
+**1. 可选链操作符(Optional chaining operator): ?.**  
+可以让我们在查询具有多个层级的对象时，不再进行冗余的各种前置校验。  
+```js
+let nestedProp;
+let nestedMethod;
+const obj = {
+  a: {
+    b: {
+      c: 'hello',
+      d: function() {
+        return this.c
+      }
+    }
+  }
+}
+// before
+// 在访问obj.a.b.c之前，需要先确认前置的值布尔转换后不是false
+nestedProp = obj && obj.a && obj.a.b && obj.a.b.c; 
+nestedMethod = obj && obj.a && obj.a.b && obj.a.b.d && obj.a.b.d()
+// after
+// 使用可选链后，一旦前置中存在null或undefined，就会短路计算并返回undefined
+nestedProp = obj?.a?.b?.c;
+nestedMethod = obj?.a?.b?.d?.();
+```  
+![](../images/daily-013.png)  
+**2. 空值合并操作符（Nullish coalescing operator）: ??**  
+当查询某个属性时，如果没有该属性就会设置一个默认的值，针对属性值为‘’，0的时候，逻辑运算符会将其转化为false，因此容易误伤。空值合并操作符仅对查询到的属性为null或undefined时，才做默认值处理。  
+```js
+let prop;
+// before
+// 这种判断方法会导致当obj.a为0或''时，被重新赋值‘暂无数据’
+prop = obj.a || '暂无数据'; 
+// 不会误伤的处理
+prop = (obj.a !== undefined && obj.a !== null) ? obj.a : '暂无数据';
 
-## 6. Scheme
-Scheme是一种函数式编程语言，是Lisp的两种主要方言之一（另一种为Common Lisp）。  
-Scheme的哲学是：设计计算机语言不应该进行功能的堆砌，而应该尽可能减少弱点和限制，使剩下的功能显得必要。
+// after
+prop = obj.a ?? '暂无数据'
+```  
+![](../images/daily-014.png)
+**3. Promise.allSettled**  
+**4. String.prototype.matchAll**  
+**5. Dynamic import**  
+**6. BigInt**  
+**7. globalThis**  
+相关链接：[TC39提案github地址](https://github.com/tc39/proposals/blob/master/finished-proposals.md)
