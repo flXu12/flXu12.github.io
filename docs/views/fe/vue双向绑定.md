@@ -90,4 +90,69 @@ Object.defineProperty(obj, prop, descriptor);
 | set | prop的setter函数，如果没有setter，则为undefined。当prop值被修改时，会调用次函数。接收一个参数。 | Function | -- | undefined |   
 
 ## 4. vue双向绑定
-利用Object.defineProperty，我们可以给一个对象属性配置set和get方法，使其变成一个响应式对象。
+利用Object.defineProperty，我们可以给一个对象属性配置set和get方法，使其变成一个响应式对象。  
+![](../images/fe-005.png)  
+
+关键代码：  
+```js
+/**
+* proxy: 把props和data上的属性代理到vm实例上
+*/
+const sharedPropertyDefinition = {
+  enumerable: true,
+  configurable: true,
+  get: noop,
+  set: noop
+}
+export function proxy(target: Object, sourceKey: String, key: String) {
+  sharedPropertyDefinition.get = function proxyGetter() {
+    return this[sourceKey][key];
+  }
+  sharedPropertyDefinition.set = function proxySetter(val) {
+    this[sourceKey][key] = val;
+  }
+  Object.defineProperty(target, key, sharedPropertyDefinition)
+}
+
+/**
+* Observer类：给对象的属性添加getter和setter，其中getter用于依赖收集，setter用于派发更新。
+*/
+exoprt class Observer {
+  // ...
+  constructor(value: any) {
+    // ...
+    def(value, '__ob__', this) // 解释了我们在输出data对象类型的数据时，为啥有一个__ob__属性
+    if(Array.isArray(value)) {
+      // ...
+      this.observeArray(value); // 对数组调用observeArray
+    } else {
+      this.walk(value); // 非数组调用walk方法
+    }
+  }
+
+  // ...
+  observeArray(items: Array<any>) {
+    for(let i = 0, l = items.length; i < l; i++) {
+      observe(items[i])
+    }
+  }
+
+  // ...
+  walk(obj: Object) {
+    const keys = Object.keys(obj) {
+      for(let i = 0; i < keys.length; i++) {
+        defineReactive(obj, keys[i]) // defineReactive: 定义一个响应式对象，给对象添加getter和setter
+      }
+    }
+  }
+}
+
+export function def(obj: object, key: string, val: any, enumerable?: boolean) {
+  Object.defineProperty(obj, key, {
+    value: val,
+    enumerable: !!enumerable,
+    writable: true,
+    configurable: true
+  })
+}
+```
