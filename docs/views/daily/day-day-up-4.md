@@ -315,7 +315,7 @@ Okay，既然sessionStorage的特性就是关闭窗口即清除token，那么这
 
 ## 5. ES2020新特性
 **1. 可选链操作符(Optional chaining operator): ?.**  
-可以让我们在查询具有多个层级的对象时，不再进行冗余的各种前置校验。  
+可以让我们在查询具有多个层级的对象时，不再进行冗余的各种前置校验。**<font color="#0000dd">使用可选链后，一旦前置中存在null或undefined，就会短路计算并返回undefined。</font>**  
 ```js
 let nestedProp;
 let nestedMethod;
@@ -340,11 +340,11 @@ nestedMethod = obj?.a?.b?.d?.();
 ```  
 ![](../images/daily-013.png)  
 **2. 空值合并操作符（Nullish coalescing operator）: ??**  
-当查询某个属性时，如果没有该属性就会设置一个默认的值，针对属性值为‘’，0的时候，逻辑运算符会将其转化为false，因此容易误伤。空值合并操作符仅对查询到的属性为null或undefined时，才做默认值处理。  
+当查询某个属性时，如果没有该属性就会设置一个默认的值，针对属性值为''，0等falsy类的值的时候，逻辑运算符会将其转化为false，因此容易误伤。**<font color="#0000dd">空值合并操作符仅对查询到的属性为null或undefined时，才做默认值处理</font>**  
 ```js
 let prop;
 // before
-// 这种判断方法会导致当obj.a为0或''时，被重新赋值‘暂无数据’
+// 这种判断方法会导致当obj.a为0或''时，被重新赋值"暂无数据"
 prop = obj.a || '暂无数据'; 
 // 不会误伤的处理
 prop = (obj.a !== undefined && obj.a !== null) ? obj.a : '暂无数据';
@@ -354,7 +354,54 @@ prop = obj.a ?? '暂无数据'
 ```  
 ![](../images/daily-014.png)
 **3. Promise.allSettled**  
+Promise.allSettled的出现是为了解决Promise.all的一个痛点：使用Promise.all来同时请求三个接口，一旦其中一个promise出现异常，就会导致整个Promise.all终止并返回一个reject的promise对象。也就是说，只要发生一个reject，就会导致三个请求的数据都无法返回。也就是说，Promise.all的结果取决于其中任意一个reject。  
+**Promise.allSettled与Promise.all的区别是：当Promise全部处理完成以后，可以拿到每一个promise的状态，无论是否成功。**  
+```js
+const promise1 = Promise.resolve('test1');
+const promise2 = Promise.reject('test2');
+const promise3 = Promise.resolve('test3');
+
+// 存在reject时，Promise.allSettled结果
+const result1 = await Promise.allSettled([promise1, promise2]);
+console.log(result1); 
+/*
+[
+  { status: 'fulfilled', value: 'test1' },
+  { status: 'rejected', reason: 'test2' }
+]
+*/
+
+// 存在reject时，Promise.all结果
+const result2 = await Promise.all([promise1, promise2]);
+// Uncaught test2
+console.log(result2); // Uncaught ReferenceError: result3 is not defined
+
+// 全部fulfilled时，Promise.all结果
+const result3 = await Promise.all([promise1, promise3]);
+console.log(result3); 
+/*
+ ['test1', test3']
+*/
+
+// 全部fulfilled时，Promise.allSettled结果
+const result4 = await Promise.allSettled([promise1, promise3]);
+console.log(result4); 
+```  
+可以看到，`Promise.all`和`Promise.allSettled`返回的结果也是有差异的，`Promise.all`仅返回promise执行的结果，而`Promise.allSettled`会同时返回promise执行的状态以及结果。
 **4. String.prototype.matchAll**  
+`matchAll`返回一个包含所有匹配正则表达式的结果及分组捕获组的迭代器，返回结果可以用for...of取出。  
+```js
+const regexp = /t(e)(st(\d?))/g;
+const str = 'test1test2';
+const array = [...str.matchAll(regexp)];
+console.log(array)
+/*
+[
+  ['test1', 'e', 'st1', '1', index: 0, input: 'testtest2', groups: undefined],
+  ['test2', 'e', 'st2', '2', index: 5, input: 'test1test2', groups: undefined]
+]
+*/
+```
 **5. Dynamic import**  
 **6. BigInt**  
 **7. globalThis**  

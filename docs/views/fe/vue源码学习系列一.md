@@ -360,7 +360,107 @@ function normalizeArrayChildren(children) {
 通过`vm._render`创建VNode以后，还需要将这个VNode渲染成一个真实的DOM，这个过程是交由`vm._update`来完成的。  
 **vm._update是vm的私有方法，在首次渲染和数据更新的时候被调用。**其作用是将VNode渲染成真实的DOM。这里分析的是首次渲染过程中`vm._update`的调用。  
 ```js
+// src/core/instance/lifecycle.js
 Vue.prototype._update = function(vnode, hydrating) {
-  
+  const vm = this;
+  const prevEl = vm.$el;
+  const prevVnode = vm._vnode;
+  const prevActiveInstance = activeInstance;
+  activeInstance = vm;
+  vm._vnode = vnode;
+  if(!prevVnode) {
+    vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false)
+  } else {
+    vm.$el = vm.__patch__(prevVnode, vnode)
+  }
+
+  activeInstance = prevActiveInstance;
+
+  if(prevEl) {
+    prevEl.__vue__ = null
+  }
+
+  if(vm.$el) {
+    vm.$el.__vue__ = vm;
+  }
+  // ...
 }
-```
+```  
+`_update`核心是调用`vm.__patch__`方法，这个方法的定义与`$mount`类似，在不同的平台定义也不一样，在web平台中的定义还区分是否为服务端渲染。  
+```js
+// src/platforms/web/runtime/index.js
+Vue.prototype.__patch__ = inBrowser ? patch : noop;
+```  
+在服务端渲染中，没有真实的浏览器DOM环境，所以不需要将VNode转换成真实的DOM，所以返回的是一个空函数；在浏览器端，`__patch__`执行的是`patch`方法：  
+```js
+// src/platforms/web/runtime/patch.js
+import { createPatchFunction } from 'core/vdom/patch';
+// ... 
+export const patch = createPatchFunction({ nodeOps, modules})
+```  
+`patch`方法的定义是调用`createPatchFunction`方法的返回值，接收了一个对象作为参数，其中nodeOps封装了一系列DOM操作方法，modules定义了一些模块的钩子函数。`createPatchFunction`方法的定义如下：  
+```js
+// src/core/vdom/patch.js
+const hooks = ['create', 'activate', 'update', 'remove', 'destroy'];
+
+export function createPatchFunction(backend) {
+  let i, j;
+  const cbs = {};
+  const { modules, nodeOps } = backend;
+
+  for(i = 0; i < hooks.length; ++i) {
+    cbs[hooks[i]] = [];
+    for(j = 0; j < modules.length; ++j) {
+      if(isDef(modules[j][hooks[i]])) {
+        cbs[hooks[i]].push(modules[j][hooks[i]])
+      }
+    }
+  }
+
+  // ...
+
+  return function patch(oldVnode, vnode, hydrating, removeOnly) {
+    // ...
+    if(isUndef(oldVnode)) {
+      isInitialPatch = true;
+      createElm(vnode, insertedVnodeQueue)
+    } else {
+      const isRealElement = isDef(oldVnode, nodeType);
+      if(!isRealElement && sameVnode(oldVnode, vnode)) {
+        patchVnode(oldVnode, vnode, insertedVnodeQueue, removeOnly)
+      } else {
+        if(isRealElement) {
+          // ...
+          if(isTrue(hydrating)) {
+            // ...
+          }
+
+          oldVnode = emptyNodeAt(oldVnode)
+        }
+
+        // ... 
+        createElm(vnode, insertedVnodeQueue, oldElm._leaveCb, nodeOps.nextSibling(oldElm));
+
+        if(isDef(vnode.parent)) {
+          // ...
+        }
+
+        if(isDef(parentElm)) {
+          removeVnodes(parentElm, [oldVnode], 0, 0)
+        } else if(isDef(oldVnode.tag)) {
+          invokeDestroyHook(oldVnode)
+        }
+      }
+    }
+
+    invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch);
+    return vnode.elm;
+  }
+} 
+```  
+`patch`方法接收四个参数，oldVnode表示旧的VNode节点，vnode表示执行`_render`后返回的VNode节点，hydrating表示是否为服务端渲染，removeOnly用于transition-group。  
+`patch`中有几个关键方法，`createElm`用于通过虚拟节点创建真实的DOM并插入到父节点中；`createComponent`方法用于创建子组件；`createChildren`方法用于创建子元素; `invokeCreteHooks`方法执行所有的create钩子并将vnode push到insertedVnodeQueue中；上述这些方法其实是调用原生的DOM API进行DOM操作。  
+
+## 7. Vue初始化到渲染的流程图
+
+![](../images/fe-006.png)
