@@ -8,6 +8,8 @@ tags:
 sidebar: auto
 ---  
 
+> 自2021年6月15日起，travis-ci.org不再支持构建了。按照迁移指南，我将博客的构建任务从travis-ci.org迁移到travis-ci.com，无缝切换，甚至保留了我的历史构建记录。添加博客评论功能目前还在犹豫要不要加上，本地的相关修改暂时留着，等哪天想支持评论就推上去吧～  
+
 ## 1. 以下代码输出了什么？  
 **关键字：<font color="#ff0000">setTimeout、Promise、async/await</font>**  
 case 1:  
