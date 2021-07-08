@@ -1,5 +1,5 @@
 ---
-title: leetcod——旋转数组（189-中等）
+title: leetcode——旋转数组（189-中等）
 date: 2021-07-07
 categories:
  - 算法

@@ -1,5 +1,5 @@
 ---
-title: leetcod——最长公共前缀（14-简单）
+title: leetcode——最长公共前缀（14-简单）
 date: 2021-07-06
 categories:
  - 算法

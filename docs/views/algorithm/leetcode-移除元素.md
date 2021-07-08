@@ -1,5 +1,5 @@
 ---
-title: leetcod——移除元素（27-简单）
+title: leetcode——移除元素（27-简单）
 date: 2021-07-07
 categories:
  - 算法

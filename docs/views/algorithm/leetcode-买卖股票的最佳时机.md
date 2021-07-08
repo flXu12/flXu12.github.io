@@ -1,5 +1,5 @@
 ---
-title: leetcod——买卖股票的最佳时机（122-简单）
+title: leetcode——买卖股票的最佳时机（122-简单）
 date: 2021-07-06
 categories:
  - 算法

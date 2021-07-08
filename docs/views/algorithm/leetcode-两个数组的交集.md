@@ -1,5 +1,5 @@
 ---
-title: leetcod——两个数组的交集（350-简单）
+title: leetcode——两个数组的交集（350-简单）
 date: 2021-07-06
 categories:
  - 算法
