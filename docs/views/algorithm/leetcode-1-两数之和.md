@@ -1,5 +1,5 @@
 ---
-title: leetcode——两数只和（1-简单）
+title: leetcode——两数之和（1-简单）
 date: 2021-07-08
 categories:
  - 算法

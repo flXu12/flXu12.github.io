@@ -32,4 +32,23 @@ sidebar: auto
 - 0 <= val <= 100
 
 ## 2. 思路分析
+遍历数组，若当前遍历元素等于目标值，则移除；反之，继续往后遍历。
+
 ## 3. 题解
+```js
+var removeElement = function (nums, val) {
+  var i = 0;
+  while(i < nums.length) {
+    if(nums[i] === val) {
+      nums.splice(i, 1);
+    } else {
+      i++;
+    }
+  }
+  return nums.length
+}
+```
+
+## 4. 进阶
+
+**[LeetCode：删除排序数组中的重复项（26-简单）](./leetcode-26-删除排序数组中的重复项.md)**
