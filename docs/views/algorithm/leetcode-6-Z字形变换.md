@@ -46,14 +46,21 @@ P  I
 - 1 <= numRows <= 1000
 
 ## 2. 思路分析
-周期为2n - 2
+周期为2n - 2  
+使用二维数组存储，根据笔画的方向（上 or 下）动态修改行序号
 
 ## 3. 题解
 ```js
 var convert = function(s, numRows) {
   if(numRows === 1) return s;
-  var peroid = numRows * 2 - 2;
-  var array = [];
-  
+  var array = Array(numRows).fill('');
+  var isDown = false; // 方向向下时，行序列递增；方向向上时，行序列递减
+  var row = 0; // 行序号
+  for(var i = 0; i < s.length; i++) {
+    array[row] += s[i];
+    if(row === 0 || row === numRows - 1) isDown = !isDown;
+    row += isDown ? 1 : -1;
+  }
+  return array.join('');
 }
 ```
