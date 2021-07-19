@@ -38,4 +38,37 @@ sidebar: auto
 - 题目数据保证列表表示的数字不含前导0
 
 ## 2. 思路分析
+遍历链表，注意进位
+
 ## 3. 题解
+```js
+/**
+单向链表定义：
+function ListNode(val, next) {
+  this.val = (val === undefined ? 0 : val);
+  this.next = (next === undefined ? null : next);
+}
+*/
+
+/**
+@param {ListNode} l1
+@param {ListNode} l2
+@return {ListNode}
+*/
+var addTwoNumbers = function(l1, l2) {
+  var list = cur = new ListNode(null);
+  var sum = 0;
+  var temp = 0; // 进位
+  while(l1 || l2 || temp) {
+    var val1 = l1 ? l1.val : 0;
+    var val2 = l2 ? l2.val : 0;
+    sum = val1 + val2 + temp;
+    temp = sum > 9 ? 1 : 0;
+    cur.next = new ListNode(sum % 10);
+    cur = cur.next;
+    l1 && l1 = l1.next;
+    l2 && l2 = l2.next;
+  }
+  return node.next;
+}
+```
