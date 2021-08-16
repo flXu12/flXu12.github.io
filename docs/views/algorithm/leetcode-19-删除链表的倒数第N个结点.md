@@ -28,4 +28,40 @@ sidebar: auto
 输出： [1]
 ```
 ## 2. 思路分析
-## 3. 题解
+关键字： 双指针  
+设置left,right双指针，right指针前进n个节点，然后left从头部开始与right一起遍历，直到right指向最后一个节点，此时left.next指向的节点就是需要被删除的节点。  
+
+## 3. 题解  
+```js
+/*
+单向链表定义：
+function ListNode(val, next) {
+  this.val = (val === undefined ? 0 : val)
+  this.next = (next === undefined ? null : next)
+}
+*/
+/**
+@param {ListNode} head
+@param {number} n
+@return {ListNode}
+*/
+var removeNthFromEnd = function (head, n) {
+  if(!head) return head;
+  if(n === 0) return head;
+  var left = head;
+  var right = head;
+  while(n > 0) {
+    right = right,next;
+    n--;
+  }
+  // 若right前进n个节点后不在链表中，则说明要删除的节点是head节点，此时返回head.next
+  if(right === null) return head.next;
+  while(right.next !== null) {
+    right = right.next;
+    left = left.next;
+  }
+  // 删除left.next节点
+  left.next = left.next.next;
+  return head;
+}
+```
