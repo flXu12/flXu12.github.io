@@ -16,7 +16,7 @@ sidebar: auto
 如果链表中存在环，则返回true；否则返回false
 
 **图示**  
-![](../images/algorithm-004.jpeg)  
+![](../images/algorithm-004.png)  
 
 ```bash
 # 示例1
