@@ -1,0 +1,167 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://danlanhai.gitee.io",
+  "elements": [
+    {
+      "id": "M3iqVH6IIZuld4D5j_2Uf",
+      "type": "rectangle",
+      "x": 468,
+      "y": 210,
+      "width": 352,
+      "height": 302,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "#228be6",
+      "fillStyle": "hachure",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "strokeSharpness": "sharp",
+      "seed": 534082090,
+      "version": 77,
+      "versionNonce": 629471210,
+      "isDeleted": false,
+      "boundElementIds": [
+        "Mv4prQkaDY8BRQOCY6bs6"
+      ]
+    },
+    {
+      "id": "r5vO2mKhkobcQFiNKkn0i",
+      "type": "text",
+      "x": 487,
+      "y": 218,
+      "width": 305,
+      "height": 266,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "#228be6",
+      "fillStyle": "hachure",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "strokeSharpness": "sharp",
+      "seed": 1611118070,
+      "version": 16,
+      "versionNonce": 1386844842,
+      "isDeleted": false,
+      "boundElementIds": [],
+      "text": "// CommonJS模块 module.js\n\nvar name = 'xiaobai';\nvar func = function(a, b){\n  return a+b;\n}\n\nmodule.exports = {\n  name,\n  func\n}",
+      "fontSize": 20,
+      "fontFamily": 3,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "baseline": 261
+    },
+    {
+      "id": "NZueJ1m0gyX9Uo4U57ld_",
+      "type": "rectangle",
+      "x": 954,
+      "y": 208,
+      "width": 519.0000000000001,
+      "height": 222,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "#228be6",
+      "fillStyle": "hachure",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "strokeSharpness": "sharp",
+      "seed": 889028010,
+      "version": 167,
+      "versionNonce": 2056232694,
+      "isDeleted": false,
+      "boundElementIds": [
+        "Mv4prQkaDY8BRQOCY6bs6"
+      ]
+    },
+    {
+      "id": "7Nj1u4FX-AFI474T9tfUa",
+      "type": "text",
+      "x": 975,
+      "y": 215.5,
+      "width": 422,
+      "height": 98,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "#228be6",
+      "fillStyle": "hachure",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "strokeSharpness": "sharp",
+      "seed": 292348086,
+      "version": 16,
+      "versionNonce": 1786701674,
+      "isDeleted": false,
+      "boundElementIds": [
+        "Mv4prQkaDY8BRQOCY6bs6"
+      ],
+      "text": "// require CommonJS模块\n\nvar module = require('./module.js');\nmodule.func(1, 2); // 3",
+      "fontSize": 20,
+      "fontFamily": 3,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "baseline": 93
+    },
+    {
+      "id": "Mv4prQkaDY8BRQOCY6bs6",
+      "type": "arrow",
+      "x": 829.5554006480403,
+      "y": 354.38798588167526,
+      "width": 123.9230579533014,
+      "height": 21.08282965431266,
+      "angle": 6.268059459742354,
+      "strokeColor": "#862e9c",
+      "backgroundColor": "#228be6",
+      "fillStyle": "hachure",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "strokeSharpness": "round",
+      "seed": 2095462378,
+      "version": 517,
+      "versionNonce": 555870966,
+      "isDeleted": false,
+      "boundElementIds": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          123.9230579533014,
+          -21.08282965431266
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "M3iqVH6IIZuld4D5j_2Uf",
+        "focus": -0.004496981243036543,
+        "gap": 9.727687237786313
+      },
+      "endBinding": {
+        "elementId": "7Nj1u4FX-AFI474T9tfUa",
+        "focus": -0.27950548468879044,
+        "gap": 21.682314299904874
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    }
+  ],
+  "appState": {
+    "gridSize": null,
+    "viewBackgroundColor": "#ffffff"
+  }
+}
