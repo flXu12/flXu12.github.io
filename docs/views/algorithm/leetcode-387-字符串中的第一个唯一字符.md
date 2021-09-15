@@ -39,4 +39,5 @@ var firstUniqChar = function(s) {
     if(map[s[i]] === 1) return i;
   }
   return -1;
+}
 ```
