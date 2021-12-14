@@ -8,8 +8,6 @@ tags:
 siderbar: auto
 ---
 
-> 总有一天你会知道，任何想要但觉得遥远的东西，努力的话是能碰得着的。
-
 ## 1. vue router history刷新404
 最近在gitlab上创建了一个用于管理各种需规和设计资源的项目（技术背景：Vue3 + vue-router4 + ant Design Vue2），并使用gitlab pages进行了部署，但是在使用过程中发现了一个问题：通过router.push跳转不同路由页面是OK的；但对路由页面进行刷新时，页面404了。  
 ![](../images/daily-019.png)  
@@ -35,3 +33,18 @@ siderbar: auto
 **怎么解决页面刷新404？**  
 修改nginx配置，当请求的资源不存在时，将原本默认的404请求指向入口文件，也就是项目配置的baseurl对应的资源。  
 ![](../images/daily-020.png)
+
+## 2. gitlab Storage为什么如此之大？
+![](../images/daily-021.png)  
+
+还是上一个项目，经过多次提交与测试发现，每次commit后gitlab Storage就涨得厉害，平均100MB/次，这样算下来要不了多久我的仓库所占存储就会超过GB了，但实际clone本项目只需要几十MB，现在来分析这个项目的存储结构：  
+1. 使用了`git lfs`进行大文件存储：因为本项目目的是为了在线预览+下载高保真和原型，所以会存储很多压缩资源，主要是为了节省git存储空间，同时满足每个文件不超过5MB的约束。参考文档： [Git Large File Storage (LFS) ](https://git-biz.qianxin-inc.cn/help/topics/git/lfs/index)  
+2. 除了项目本身必须的一些存储（files, .git），目前并未使用多分支开发，也没有添加tag管理，因此必须的存储空间已无裁剪余地。  
+3. 使用了`gitlab pages`来部署静态资源：每次master分支的提交都会触发ci/cd，ci/cd成功都会保留两个制品文件。  
+
+![](../images/daily-022.png)  
+> 公司电脑添加了水印，请不要在意截图中的红色方块~
+下载了上图红框标注的artifacts，来看看大小：  
+![](../images/daily-023.png)
+
+现在storage大的原因基本找到了，就是ci/cd的制品一直保留着在，导致每次执行ci/cd都会增加一部分存储占用。
