@@ -47,4 +47,42 @@ siderbar: auto
 下载了上图红框标注的artifacts，来看看大小：  
 ![](../images/daily-023.png)
 
-现在storage大的原因基本找到了，就是ci/cd的制品一直保留着在，导致每次执行ci/cd都会增加一部分存储占用。
+现在storage大的原因基本找到了，就是ci/cd的制品一直保留着在，导致每次执行ci/cd都会增加一部分存储占用。清除ci/cd历史的artifacts:   
+```yml
+# .gitlab-ci.yml
+artifacts:
+  expire_in: 1 day  # 一天后过期
+```
+
+## 3. 思考如下代码
+```js
+// 本案例来自《你不知道的JavaScript（上）》
+var anotherObject = { a: 2 };
+var myObject = Object.create(anotherObject);
+
+anotherObject.a;  // 2
+myObject.a;  // 2
+
+anotherObject.hasOwnProperty("a");  // true
+myObject.hasOwnProperty("a");  // false ?
+
+myObject.a++;
+
+anotherObject.a;  // 2
+myObject.a;  // 3
+
+myObject.hasOwnProperty("a")  // true  ?????
+```
+> `Object.create()`方法创建一个新对象，使用现有的对象来提供新创建的对象的__proto__。
+
+通过`Object.create()`来创建的对象`myObject`本身是没有属性a的, 实际上a属性存在于[[Protptype]]原型链中：  
+![](../images/daily-024.png)  
+
+对象属性访问首先会查找当前对象本身的属性，当属性不存在且[[Prototype]]非空时，会继续向上查找，因此`myObject.a`可以获取a属性值；  
+
+**重点来了**，当属性不直接存在于对象中，而是位于原型链上层时，执行`obj.a = b`这样的赋值操作会出现三种情况：  
+1. 如果在[[Prototype]]链上层存在名为a的属性且未被标记为只读（writable: false），就会直接在obj中添加一个名为a的新属性  
+2. 如果在[[Prototype]]链上层存在a且被标记为只读（writable: false），则无法修改已有属性或在obj上创建新的属性
+3. 如果[[Prototype]]链上层存在a且是一个`setter`，则一定会调用这个`setter`。a不会被添加到obj,也不会重新定义这个`setter`  
+
+关键操作来了，`myObject.a++`实际相当于`myObject.a = myObject.a + 1`，命中了上述第一种情况，从而有了后边的`myObject.hasOwnProperty('a')`返回true。
