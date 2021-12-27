@@ -8,6 +8,8 @@ tags:
 siderbar: auto
 ---
 
+> 勤学如春起之苗，不见其增，日有所长；辍学如磨刀之石，不见其损，日有所亏。
+
 ## 1. vue router history刷新404
 最近在gitlab上创建了一个用于管理各种需规和设计资源的项目（技术背景：Vue3 + vue-router4 + ant Design Vue2），并使用gitlab pages进行了部署，但是在使用过程中发现了一个问题：通过router.push跳转不同路由页面是OK的；但对路由页面进行刷新时，页面404了。  
 ![](../images/daily-019.png)  
