@@ -45,7 +45,7 @@ siderbar: auto
 3. 使用了`gitlab pages`来部署静态资源：每次master分支的提交都会触发ci/cd，ci/cd成功都会保留两个制品文件。  
 
 ![](../images/daily-022.png)  
-> 公司电脑添加了水印，请不要在意截图中的红色方块~
+
 下载了上图红框标注的artifacts，来看看大小：  
 ![](../images/daily-023.png)
 
