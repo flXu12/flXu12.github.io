@@ -56,7 +56,9 @@ artifacts:
   expire_in: 1 day  # 一天后过期
 ```
 
-## 3. 思考如下代码
+## 3. Object.create
+思考如下代码：  
+
 ```js
 // 本案例来自《你不知道的JavaScript（上）》
 var anotherObject = { a: 2 };
@@ -88,3 +90,17 @@ myObject.hasOwnProperty("a")  // true  ?????
 3. 如果[[Prototype]]链上层存在a且是一个`setter`，则一定会调用这个`setter`。a不会被添加到obj,也不会重新定义这个`setter`  
 
 关键操作来了，`myObject.a++`实际相当于`myObject.a = myObject.a + 1`，命中了上述第一种情况，从而有了后边的`myObject.hasOwnProperty('a')`返回true。
+
+## 4. 封装对象
+思考如下代码：
+
+```js
+var a = new Boolean(false);
+if(!a) {
+  console.log('okay')  
+}
+```  
+上述代码并不会执行到`console.log`，原因是变量`a`是一个truthy值。  
+**封装对象**通常用于包装基本类型（string, number），使其可访问.toString和.length这样的属性方法。  
+`new Boolean`创建了一个封装对象，而对象的布尔值总是true的，因此无法执行到打印语句。  
+**一般情况下，我们不需要直接使用封装对象，因为JavaScript引擎自己能够决定什么时候应该是用封装对象。**
