@@ -40,7 +40,7 @@ siderbar: auto
 ![](../images/daily-021.png)  
 
 还是上一个项目，经过多次提交与测试发现，每次commit后gitlab Storage就涨得厉害，平均100MB/次，这样算下来要不了多久我的仓库所占存储就会超过GB了，但实际clone本项目只需要几十MB，现在来分析这个项目的存储结构：  
-1. 使用了`git lfs`进行大文件存储：因为本项目目的是为了在线预览+下载高保真和原型，所以会存储很多压缩资源，主要是为了节省git存储空间，同时满足每个文件不超过5MB的约束。参考文档： [Git Large File Storage (LFS) ](https://git-biz.qianxin-inc.cn/help/topics/git/lfs/index)  
+1. 使用了`git lfs`进行大文件存储：因为本项目目的是为了在线预览+下载高保真和原型，所以会存储很多压缩资源，主要是为了节省git存储空间，同时满足每个文件不超过5MB的约束。
 2. 除了项目本身必须的一些存储（files, .git），目前并未使用多分支开发，也没有添加tag管理，因此必须的存储空间已无裁剪余地。  
 3. 使用了`gitlab pages`来部署静态资源：每次master分支的提交都会触发ci/cd，ci/cd成功都会保留两个制品文件。  
 
