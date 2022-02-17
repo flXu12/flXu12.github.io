@@ -116,3 +116,7 @@ function throttle(fn, delay) {
 **节流**  
 ![](../images/daily-029.gif)
 
+参考如下资料：  
+- [什么是节流和防抖](https://muyiy.cn/question/js/3.html)  
+- [JavaScript专题之跟着underscore学防抖](https://github.com/mqyqingfeng/Blog/issues/22#)  
+- [JavaScript专题之跟着 underscore 学节流](https://github.com/mqyqingfeng/Blog/issues/26#)
