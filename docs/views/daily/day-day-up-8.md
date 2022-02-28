@@ -199,4 +199,45 @@ self.close();
 4. **脚本限制**：Worker线程不能执行`alert()`和`confirm()`方法，但可以使用XMLHttpRequest对象发出AJAX请求。  
 5. **文件限制**：Worker线程无法读取本地文件，它所加载的脚本必须来自网络。  
 
-> 本节参考阮一峰老师的[Web Worker使用教程](https://www.ruanyifeng.com/blog/2018/07/web-worker.html)
+> 本节参考阮一峰老师的[Web Worker使用教程](https://www.ruanyifeng.com/blog/2018/07/web-worker.html)  
+
+## 4. WebSocket
+WebSocket是HTML5的新特性之一。  
+WebSocket协议为web应用程序客户端与服务端之间提供了一种全双工通信机制，弥补了HTTP通信的一个缺陷————通信只能由客户端发起。    
+![](../images/daily-030.png)  
+### 4.1 WebSocket特点  
+1. 建立在 TCP 协议之上，服务器端的实现比较容易。  
+2. 与 HTTP 协议有着良好的兼容性。默认端口也是80和443，并且握手阶段采用 HTTP 协议，因此握手时不容易屏蔽，能通过各种 HTTP 代理服务器。  
+3. 数据格式比较轻量，性能开销小，通信高效。  
+4. 可以发送文本，也可以发送二进制数据。  
+5. 没有同源限制，客户端可以与任意服务器通信。  
+6. 协议标识符是`ws`（如果加密，则为`wss`），服务器网址就是 URL：  
+```bash
+ws://example.com:80/some/path
+```   
+![](../images/daily-031.jpg)  
+### 4.2 客户端API  
+1. 使用构造函数`WebSocket()`与服务器建立连接  
+```js
+const ws = new WebSocket('ws://location:8080');
+```  
+2. 实例`ws`属性  
+属性：
+
+| 属性 | 描述 | 类型 | 取值 |  
+|---- | ---- | ---- | ---- |  
+| readyState | 实例对象的当前状态 | Number | 0：CONNECTING，表示正在连接；1：OPEN，表示连接成功，可以通信了；2：CLOSING，表示连接正在关闭；3：CLOSED，表示连接已经关闭或打开连接失败 |  
+| onopen | 用于指定连接成功后的回调函数 | Function | event对象 |    
+| onclose | 用于指定连接关闭后的回调函数 | Function | event对象 |  
+| onmessage | 用于指定收到服务器数据后的回调函数 | Function | event对象 |  
+| binaryType | 显示指定收到的二进制数据类型 | String | 'blob', 'arraybuffer'等 |  
+| bufferedAmount | 表示还有多少字节的二进制数据没有发送出去，用于判断发送是否结束 | Number | - |  
+| onerror | 用于指定报错时的回调函数 | Function | - | 
+
+方法：  
+
+| 方法 | 描述 |  
+| ---- | ---- |  
+| send() | 用于向服务器发送数据 |
+
+> 本节参考阮一峰老师的[WebSocket教程](https://www.ruanyifeng.com/blog/2017/05/websocket.html)
