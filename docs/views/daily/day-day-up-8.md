@@ -119,4 +119,84 @@ function throttle(fn, delay) {
 参考如下资料：  
 - [什么是节流和防抖](https://muyiy.cn/question/js/3.html)  
 - [JavaScript专题之跟着underscore学防抖](https://github.com/mqyqingfeng/Blog/issues/22#)  
-- [JavaScript专题之跟着 underscore 学节流](https://github.com/mqyqingfeng/Blog/issues/26#)
+- [JavaScript专题之跟着 underscore 学节流](https://github.com/mqyqingfeng/Blog/issues/26#)  
+
+## 3. Web Worker
+Web Worker是HTML5新特性。  
+JavaScript是单线程的，这样就容易出现一个问题，只要前面的任务没有执行完，后面的任务就只能等待。  
+Web Worker为JavaScript创造了多线程环境，允许主线程创建Worker线程，在主线程运行的同时，Worker线程在后台运行，两者互不干扰。  
+### 3.1 使用
+1. 主线程调用`Worker()`构造函数，创建一个Worker线程。  
+```js
+// 第一个参数是一个脚本文件路径，改文件就是Worker线程执行的任务，因为Worker不能读取本地文件，因此该脚本文件必须来源于网络
+// 第二个参数是配置对象，可选，用于指定Worker的名称，如name: 'xxx'，区分多个Worker线程
+const worker = new Worker('worker.js');
+```  
+2. 主线程调用`worker.postMessage()`向Worker发消息。  
+主线程：  
+```js
+// worker.postMessage()方法的参数即为主线程传给Worker的数据，可以是任何数据类型。
+worker.postMessage('hello world');
+worker.postMessage({ method: 'echo', args: ['Work']})
+```  
+Worker线程内部需要一个监听函数，用于监听message事件(addEventListener or onmessage)：  
+```js
+// worker.js
+
+// self表示子线程自身，击子线程的全局对象
+self.addEventListener('message', function(e) {
+  self.postMessage('you said: ' + e.data);
+}, false);
+
+// 也可以用self.onmessage指定监听
+```  
+3. 主线程通过`worker.onmessage`指定监听函数，接收子线程发回来的消息。  
+```js
+worker.onmessage = function(event) {
+  // 可以从event.data中获取Worker发来的数据
+  console.log('recieved message: ' + event.data);
+  doSomething();
+}
+
+function doSomething() {
+  // 执行任务
+  worker.postMessage('work done');
+}
+```  
+4. Worker内部如果需要加载其它脚本，可以使用`importScripts()`方法。  
+```js
+// 加载单个脚本
+importScripts('script1.js');
+
+// 加载多个脚本
+importScripts('script1.js', 'script2.js');
+```  
+5. 错误处理  
+主线程可以监听Worker是否发生错误，Worker线程内部也是可以监听 `error`事件的。  
+```js
+worker.onerror(function(error) {
+  // xxx
+})
+
+// 或者
+worker.addEventListener('error', function(error) {
+  // xx
+})
+```  
+6. 关闭Worker线程  
+当Worker完成任务以后，可以在主线程将其关闭:   
+```js
+worker.terminate();
+```  
+也可以在Worker线程内部关闭自身：  
+```js
+self.close();
+```  
+### 3.2 Web Worker使用注意事项
+1. **同源限制**：分配给Worker线程运行的脚本文件，必须与主线程的脚本文件同源。  
+2. **DOM限制**：Worker线程所在的全局对象与主线程不一样，无法读取主线程所在网页的DOM对象，也不能使用`document`、`window `、`parent`等对象，但可以使用`navigator`和`location`对象。   
+3. **通信联系**：Worker线程和主线程不在同一个上下文环境，不能直接通信，需要使用`postMessage()`。   
+4. **脚本限制**：Worker线程不能执行`alert()`和`confirm()`方法，但可以使用XMLHttpRequest对象发出AJAX请求。  
+5. **文件限制**：Worker线程无法读取本地文件，它所加载的脚本必须来自网络。  
+
+> 本节参考阮一峰老师的[Web Worker使用教程](https://www.ruanyifeng.com/blog/2018/07/web-worker.html)
