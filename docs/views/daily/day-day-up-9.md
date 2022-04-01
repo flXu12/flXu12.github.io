@@ -28,7 +28,8 @@ siderbar: auto
 
 > 本节内容参考[SSR原理](https://github.com/yacan8/blog/issues/30)
 
-## 2. 前后端分离[WIP]
+## 2. 前后端分离
+顾名思义，就是将一个应用的前端代码和后端代码分开写，前后端研发提前约定好接口（前后端通过接口通信），然后并行开发，最后集成。
 
 ## 3. 发布-订阅模式
 ### 3.1 概念
@@ -39,7 +40,7 @@ siderbar: auto
 **例子**：比如我们经常看的微信公众号，当很喜欢某个公众号发布的内容时，就会点击关注，然后公众号每次有内容发布时，都会收到微信消息提示，告知有新的内容更新了。  
 在这个例子里边，用户作为订阅者，可以订阅多个不同的公众号；而公众号作为发布者，将事件发布到调度中心，然后由调度中心发送消息告知用户。
 
-#### 3.2 简易版发布-订阅实现
+### 3.2 简易版发布-订阅实现
 发布-订阅需要以下要素：  
 - 创建一个类
 - on方法：订阅  
@@ -107,3 +108,217 @@ eventEmitter.emit('eventName2');
 //  'callback1'
 //  'once callback'
 ```
+
+## 4. 插槽：$slots, slot, $scopedSlots, slot-scope, v-slot [WIP]
+### 4.1 插槽是什么  
+Vue实现了一套内容分发API，将`<slot>`元素作为承载分发内容的出口。简单来说就是子组件内部留了一个或多个插槽位置，可以在使用该组件时传入模板代码或组件。   
+插槽可以让用户拓展组件，让组件变得更加灵活。  
+### 4.2 插槽分类  
+- 默认插槽  
+- 具名插槽  
+- 作用域插槽  
+
+**默认插槽**  
+父组件在使用时，直接将想要传入的内容写在子组件标签`<child>`内。  
+子组件用`<slot>`标签来确定渲染的位置，标签中可以放一些默认内容，当父组件使用时没有往子组件传入内容，子组件的`<slot>`标签内容就会显示在页面。
+
+父组件：  
+```vue
+<template>
+  <div>
+    <h2>我是父组件标题</h2>
+    <child>这段内容在子组件中展示哦</child>
+    <child><button>向子组件传了一个button组件</button></child>
+    <child />
+  </div>
+</template>
+<script>
+  import Child from './child.vue';
+  export default {
+    components: { Child }
+  }
+</script>
+```
+
+子组件：  
+```vue
+<template>
+  <div>
+    <slot>如果父组件啥都不传，我就出来啦</slot>
+  </div>
+</template>
+<script>
+  export default {
+    name: 'Child'
+  }
+</script>
+```  
+
+效果图：  
+![](../images/daily-033.png)
+
+**具名插槽**
+父组件在使用子组件`<child>`时，将想要放入的内容包裹在`<template>`标签内，并在`<template>`标签上添加`v-slot:xxx`，其中`xxx`是插槽名称，对应子组件`<child>`的`<slot>`标签上的`name`属性。`v-slot:`指令也可以简化为`#`。    
+子组件`<child>`用`<slot>`标签来确定渲染的位置，`<slot>`标签上加一个`name`属性，表示插槽名称，当不传`name`属性时，等同于`name="default"`。标签中可以放一些默认内容，当父组件使用时没有往子组件传入内容，子组件的`<slot>`标签中内容就会显示在页面。   
+
+父组件：   
+```vue
+<template>
+  <div id="app">
+    <h2>我是父组件标题</h2>
+    <child>
+      <template v-slot:default>通过v-slot:default传入了这段文本</template>
+      <template v-slot:content><button>通过v-slot:content传了一个button组件</button></template>
+    </child>
+    <child>
+      <template #default>通过#default传入了这段文本</template>
+      <template #content><button>通过#content传入了一个button组件</button></template>
+    </child>
+    <child />
+  </div>
+</template>
+
+<script>
+import Child from './child.vue';
+
+export default {
+  name: 'App',
+  components: {
+    Child
+  }
+}
+</script>
+```
+
+子组件：  
+```vue
+<template>
+  <div>
+    <slot>我是name=default的默认插槽，如果父组件啥都不传，我就出来啦</slot>
+    <slot name="content">我是name=content的插槽，如果父组件啥都不传，我就出来啦</slot>
+  </div>
+</template>
+<script>
+  export default {
+    name: 'Child'
+  }
+</script>
+```
+
+效果图：  
+![](../images/daily-034.png)  
+
+<font color="#008dff">动态插槽名</font>  
+顾名思义，父组件向子组件传不同的name即渲染子组件不同的插槽内容。  
+
+父组件：  
+```vue
+<template>
+  <div id="app">
+    <h2>我是父组件标题</h2>
+    <button @click="add">count: {{count}}</button>
+    <child>
+      <template v-slot:[dynamicSlotName]>这个内容是根据动态插槽名变化的哦，现在插槽名称叫{{ dynamicSlotName }}</template>
+    </child>
+  </div>
+</template>
+
+<script>
+import Child from './child.vue';
+
+export default {
+  name: 'App',
+  components: {
+    Child
+  },
+  data() {
+    return {
+      count: 0
+    }
+  },
+  computed: {
+    dynamicSlotName() {
+      return this.count%2 === 0 ? 'default' : 'content';
+    }
+  },
+  methods: {
+    add() {
+      this.count++;
+    }
+  }
+}
+</script>
+```
+
+子组件：  
+```vue
+<template>
+  <div>
+    <slot>我是name=default的默认插槽，如果父组件啥都不传，我就出来啦</slot><br>
+    <slot name="content">我是name=content的插槽，如果父组件啥都不传，我就出来啦</slot>
+  </div>
+</template>
+<script>
+  export default {
+    name: 'Child'
+  }
+</script>
+```
+
+效果图：  
+![](../images/daily-035.gif)  
+
+**作用域插槽**  
+父组件通过`v-slot:xxx="childProps"`或`#xxx="childProps"`来向子组件`<child>`插入内容的同时，可以从`childProps`中获取子组件传出来的一些数据。  
+子组件`<child>`将想要对外传出的数据放到`<slot>`标签上，父组件即可拿到。   
+
+父组件：  
+```vue
+<template>
+  <div id="app">
+    <h2>我是父组件标题</h2>
+    <child v-slot:default="slotData">{{ slotData.slotProps.a + slotData.slotProps.b}}</child>
+  </div>
+</template>
+
+<script>
+import Child from './child.vue';
+
+export default {
+  name: 'App',
+  components: {
+    Child
+  },
+}
+</script>
+```
+
+子组件：  
+```vue
+<template>
+  <div>
+    <slot :slotProps="name">我是name=content的插槽，如果父组件啥都不传，我就出来啦</slot>
+  </div>
+</template>
+<script>
+  export default {
+    name: 'Child',
+    data() {
+      return {
+        name: { a: 111, b: '哈哈哈' }
+      }
+    }
+  }
+</script>
+```
+
+效果图： 
+![](../images/daily-036.png) 
+
+**小结**  
+- `v-slot`属性只能在`<template>`标签上使用，特例是当**只有**默认插槽时，可以直接在子组件`<child>`标签上使用。   
+- 默认插槽名为`default`，可以将`v-slot:default`省略为`v-slot`。  
+- 将`v-slot:`缩写为`#`时插槽名必写，默认插槽需写`#default`。  
+- 默认插槽时，可以通过解构获取作用于插槽内的变量，`v-slot="{a}"`，或重命名`v-slot="{a: newName}"`，或自定义属性默认值`v-slot="{a: 111111 }"`。
+
+
