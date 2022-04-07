@@ -109,7 +109,7 @@ eventEmitter.emit('eventName2');
 //  'once callback'
 ```
 
-## 4. 插槽：$slots, slot, $scopedSlots, slot-scope, v-slot [WIP]
+## 4. 插槽：$slots, slot, $scopedSlots, slot-scope, v-slot
 ### 4.1 插槽是什么  
 Vue实现了一套内容分发API，将`<slot>`元素作为承载分发内容的出口。简单来说就是子组件内部留了一个或多个插槽位置，可以在使用该组件时传入模板代码或组件。   
 插槽可以让用户拓展组件，让组件变得更加灵活。  
@@ -321,4 +321,121 @@ export default {
 - 将`v-slot:`缩写为`#`时插槽名必写，默认插槽需写`#default`。  
 - 默认插槽时，可以通过解构获取作用于插槽内的变量，`v-slot="{a}"`，或重命名`v-slot="{a: newName}"`，或自定义属性默认值`v-slot="{a: 111111 }"`。
 
+### 4.3 $slots, $scopedSlots
+通常在**渲染函数**中使用`vm.$slots`和`vm.$scopedSlots`。  
+**vm.$slots**  
+- 类型： `{ [name: string]: ?Array<VNode> }`  
+- 详情：用于在子组件（child.vue）访问被插槽分发的内容。（如：`v-slot:foo`的内容可通过`vm.$slots.foo`找到）
 
+父组件：  
+```vue
+<template>
+  <div id="app">
+    <h2>我是父组件标题</h2>
+    <child>
+      <template v-slot:header><h3>我是插槽名为header的内容</h3></template>
+      <p>我是默认插槽内容</p>
+      <template v-slot:footer><p>我是插槽名为footer的内容</p></template>
+    </child>
+  </div>
+</template>
+
+<script>
+import Child from './child.vue';
+
+export default {
+  name: 'App',
+  components: {
+    Child
+  },
+}
+</script>
+```
+
+子组件：  
+```vue
+<script>
+  export default {
+    name: 'Child',
+    render(h, vm) {
+      const header = this.$slots.header;
+      const body = this.$slots.default;
+      const footer = this.$slots.footer;
+      console.log(this.$slots)
+      return h('div',[
+        h('div', header),
+        h('div', body),
+        h('div', footer)
+      ])
+    }
+  }
+</script>
+```  
+
+最终效果图以及child.vue中打印的`this.$slots`内容如下：   
+![](../images/daily-037.png)
+
+
+**vm.$scopedSlots**  
+- 类型： `{ [name: string]: props => Array<VNode> | undefined }`  
+- 详细：用来访问作用域插槽。对于包括`默认slot`在内的每一个插槽，该对象都包含一个返回相应`VNode`的函数。  
+- 注意： 
+  - 作用域插槽函数现在保证返回一个`VNode`数组，除非在返回值无效的情况下返回`undefined`。  
+  - 所有的`$slots`现在都会作为函数暴露在`$scopedSlots`中。如果你在使用渲染函数，不论当前插槽是否带有作用域，我们都推荐始终通过`$scopedSlots`访问它们。
+
+父组件：  
+```vue
+<template>
+  <div id="app">
+    <h2>我是父组件标题</h2>
+    <child>
+      <template v-slot:header><h3>我是插槽名为header的内容</h3></template>
+      <template v-slot:default="slotProps"><p>{{ slotProps.a + slotProps.b}}</p></template>
+      <template v-slot:footer><p>我是插槽名为footer的内容</p></template>
+    </child>
+  </div>
+</template>
+
+<script>
+import Child from './child.vue';
+
+export default {
+  name: 'App',
+  components: {
+    Child
+  },
+}
+</script>
+```
+
+子组件：  
+```vue
+<script>
+  export default {
+    name: 'Child',
+    data() {
+      return {
+        name: { a: '111', b: '哈哈哈' }
+      }
+    },
+    render(h, vm) {
+      const header = this.$slots.header;
+      const body = this.$scopedSlots.default(this.name);
+      const footer = this.$slots.footer;
+      console.log(this.$scopedSlots, this.$slots)
+      return h('div',[
+        h('div', header),
+        h('div', body),
+        h('div', footer)
+      ])
+    }
+  }
+</script>
+```
+
+效果图以及child.vue打印结果如下：  
+![](../images/daily-038.png)
+
+**Vue 3.x插槽统一 [<font color="red">Break Change</font>]**  
+- 在3.x中，将所有`vm.$scopedSlots`替换为`vm.$slots`，移除`vm.$scopedslots`  
+- 在3.x中，`vm.$slots`将插槽作为函数公开（即2.x中通过`this.$slots.slotName`将替换为`this.$slots.slotName()`）。
