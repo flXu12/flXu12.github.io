@@ -37,3 +37,48 @@ siderbar: auto
 - 上述处理后得到的计算式为`parseInt('5e-7', 10)`;  
 - 命中**特殊说明**第一条，`parseInt`会忽略`radix`中不包含的字符，无法识别字符'e'及其后续字符；  
 - 上述处理后得到的计算结果等同于`parseInt('5', 10)`，即为5.
+
+## 3. peerDpendencies那些事
+### 3.1 场景描述
+最近在一个项目中遇到了个依赖安装的问题，下面来描述下过程：  
+1. 当前有个项目仓库名为`project-A`，由于用到了一些业务类的工具库，就在dependencies里引入了工具库`lib-B`  
+```json
+// project-A的package.json
+{
+  // ...
+  "dependencies": {
+    "lib-B" : "^1.0.0"
+  }
+  // ...
+}
+```  
+2. 工具库`lib-B`的代码中部分功能需要使用`vue`、`vuex`、`moment`库，依赖情况如下：  
+```json
+// lib-B的package.json
+{
+  "dependencies": {},
+  "devDependencies": {
+    "vue": "^2.6.12",
+    "vuex": "^3.5.1",
+    "moment": "^2.29.1"
+  },
+  "peerDependencies": {
+    "vue": "^2",
+    "vuex": "^3",
+    "moment": "^2"
+  }
+}
+```  
+3. 当我们在`project-A`仓库下执行依赖安装后，再运行项目时，会发现项目无法运行起来，错误信息提示类似“vue is not found in package.json”，并提示我们执行`npm install vue`来安装缺失的依赖。  
+4. 一般这种情况下，我们的解决办法就是按照提示所言，执行`npm install vue`，然后重新`npm run serve`，并且这么做以后，项目确实按照期望跑起来了。
+
+### 3.2 问题
+我思考了如下几个问题，以`vue`为例：  
+1. 类似`vue`这样的依赖，`project-A`并没有直接使用，为什么要安装？  
+2. `vue`在`lib-B`中作为`devDependencies`被安装了，怎么打包的时候没打进去呢？  
+3. 既然`lib-B`依赖了`vue`，那为什么不把`vue`装到`dependencies`里，而是放到了`devDependencies`和`peerDependencies`里？  
+4. `vue`官方提供的安装方式是将其安装到`dependencies`，而`lib-B`的做法如果是合理的，那是否表示所有的公共库在管理第三方基础依赖时，都需要将其放到`devDependencies`和`peerDependencies`中？
+
+## 3.3 解惑
+上边抛出的四个问题是依次递进的，前2个问题比较好解答，但为了更好解释后两个问题，所以也列举出来了。
+
