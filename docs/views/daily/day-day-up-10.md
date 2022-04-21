@@ -79,6 +79,23 @@ siderbar: auto
 3. 既然`lib-B`依赖了`vue`，那为什么不把`vue`装到`dependencies`里，而是放到了`devDependencies`和`peerDependencies`里？  
 4. `vue`官方提供的安装方式是将其安装到`dependencies`，而`lib-B`的做法如果是合理的，那是否表示所有的公共库在管理第三方基础依赖时，都需要将其放到`devDependencies`和`peerDependencies`中？
 
-## 3.3 解惑
+## 3.3 解惑  
+**开发环境、生产环境**   
+开发环境：项目尚在编码阶段时的环境。代码中可能还有各种console.log、注释、格式化等。  
+生产环境：项目已经完成编码，并发布上线可供用户浏览的阶段时的环境。代码可能经过了压缩、优化等处理。  
+
+**dependencies、DevDependencies、peerDependencies**   
+`dependencies`：又称**生产依赖**，不仅在开发环境中需要使用，在项目投入使用时（即生产环境），仍然需要的依赖。安装方式：`npm install <packageName>`  
+`devDependencies`：又称**开发依赖、运行依赖**，只在开发阶段（开发环境）需要，一旦项目投入使用（生产环境），便不再需要的依赖，不会被打入包内。安装方式：`npm install <packageName> -D`    
+`peerDependencies`：又称**对等依赖**，不会自动安装的依赖。在`npm install`时不会安装，并且也不会被打入包内，但要求引用这个库的项目安装的依赖，引用者需要自行安装这些依赖。打个比方：某个包`b`的`peerDependencies`中有依赖项`c`，此时项目`a`安装了依赖`b`，那么就必须同时安装依赖`c`。   
+
+**peerDependencies存在的意义是？**  
+
+
 上边抛出的四个问题是依次递进的，前2个问题比较好解答，但为了更好解释后两个问题，所以也列举出来了。
 
+## 4. vm.$refs.xxx获取到了个啥？
+有时候是`VueComponent`，即vue实例，有时候是`element`，即一个`DOM`。
+
+## 5. fixed从父原则导致z-index无效
+[fixed从父原则导致z-index无效](http://obkoro1.com/web_accumulate/codeBlack/fixed%E7%9A%84%E4%BB%8E%E7%88%B6%E5%8E%9F%E5%88%99.html)
