@@ -99,3 +99,5 @@ siderbar: auto
 
 ## 5. fixed从父原则导致z-index无效
 [fixed从父原则导致z-index无效](http://obkoro1.com/web_accumulate/codeBlack/fixed%E7%9A%84%E4%BB%8E%E7%88%B6%E5%8E%9F%E5%88%99.html)
+
+## 6. 【踩坑】表单校验之validate为什么不生效？
