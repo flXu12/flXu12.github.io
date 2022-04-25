@@ -69,7 +69,7 @@ siderbar: auto
   }
 }
 ```  
-3. 当我们在`project-A`仓库下执行依赖安装后，再运行项目时，会发现项目无法运行起来，错误信息提示类似“vue is not found in package.json”，并提示我们执行`npm install vue`来安装缺失的依赖。  
+3. 当我们在`project-A`仓库下执行依赖安装后，再运行项目时，会发现项目无法运行起来，错误信息提示类似“vue是一个需要的依赖，但没有被安装”，并提示我们执行`npm install vue`来安装缺失的依赖。  
 4. 一般这种情况下，我们的解决办法就是按照提示所言，执行`npm install vue`，然后重新`npm run serve`，并且这么做以后，项目确实按照期望跑起来了。
 
 ### 3.2 问题
@@ -77,22 +77,34 @@ siderbar: auto
 1. 类似`vue`这样的依赖，`project-A`并没有直接使用，为什么要安装？  
 2. `vue`在`lib-B`中作为`devDependencies`被安装了，怎么打包的时候没打进去呢？  
 3. 既然`lib-B`依赖了`vue`，那为什么不把`vue`装到`dependencies`里，而是放到了`devDependencies`和`peerDependencies`里？  
-4. `vue`官方提供的安装方式是将其安装到`dependencies`，而`lib-B`的做法如果是合理的，那是否表示所有的公共库在管理第三方基础依赖时，都需要将其放到`devDependencies`和`peerDependencies`中？
 
-## 3.3 解惑  
-**开发环境、生产环境**   
-开发环境：项目尚在编码阶段时的环境。代码中可能还有各种console.log、注释、格式化等。  
-生产环境：项目已经完成编码，并发布上线可供用户浏览的阶段时的环境。代码可能经过了压缩、优化等处理。  
+## 3.3 `peerDependencies`
+对`peerDependencies`最直观的一种解释是：  
+> 如果你安装我，那么你最好也安装x,y,z.   
+`peerDependencies`：又称**对等依赖**，不会自动安装的依赖。在`npm install`时不会安装，并且也不会被打入包内，但要求引用这个库的项目安装的依赖，引用者需要自行安装这些依赖。打个比方：某个包`b`的`peerDependencies`中有依赖项`c`，此时项目`a`安装了依赖`b`，那么就必须同时安装依赖`c`。 
+  
+代入到上述场景，即为：如果你要安装`lib-B`，那么你最好也安装`vue@^2`,`vuex@^3`,`moment@^2`。这也回答了第1个问题，因为`project-A`安装了`lib-B`，所以也需要安装`vue`。 
 
-**dependencies、DevDependencies、peerDependencies**   
+在npm2中，插件（`lib-B`）中`peerDependencies`所指定的依赖会随着执行插件安装（`npm install lib-B`）被一起强制安装，因此不需要在宿主环境`package.json`中指定对插件中`peerDependencies`内容的依赖。  
+在npm3中，不会在要求`peerDependencies`中的依赖被强制安装，而是会在安装结束后检查本次安装是否正确，如果不正确会给用户打印警告提示。这时如果出现提示“vue是一个需要的依赖，但没有被安装”，就需要在宿主环境的`package.json`中指定`vue`的依赖。  
+代入到上述场景，也就解释了为什么在第4步中执行`npm install vue`后项目就可以按照预期正常运行。 
+
+`peerDependencies`要求宿主环境安装其指定版本的依赖包，并且在插件（这里指`lib-B`）中使用这些依赖包时，永远使用的都是宿主环境所安装的依赖包，这样做的原因：  
+- 通常`peerDependencies`中指定的依赖，在宿主环境中也需要直接依赖并被使用
+- 能解决宿主环境和插件环境所装依赖版本不一致的问题
+- 当`peerDependencies`中的某个包在某次版本更新时出现了新的特性或者不兼容修改，可以直接在宿主环境中升级，而不需要更新插件依赖--> 插件发包 --> 宿主环境更新插件版本这一系列操作
+
+上述说明也解释了第3个问题，由于`vue`本身就是一个基础的框架库，当宿主环境安装插件时，通常也会直接依赖`vue`，而在后续`vue`升级出现新特性时只需要更新宿主环境的版本即可。同时将其装在`devDependencies`的原因是确保在构建时插件不会自持`vue`，而是取决于宿主环境的`vue`.  
+
+## 3.4 带一波`dependencies` & `devDependencies` 
+**开发环境**：项目尚在编码阶段时的环境。代码中可能还有各种console.log、注释、格式化等。  
+**生产环境**：项目已经完成编码，并发布上线可供用户浏览的阶段时的环境。代码可能经过了压缩、优化等处理。  
+`dependencies`  
+
 `dependencies`：又称**生产依赖**，不仅在开发环境中需要使用，在项目投入使用时（即生产环境），仍然需要的依赖。安装方式：`npm install <packageName>`  
 `devDependencies`：又称**开发依赖、运行依赖**，只在开发阶段（开发环境）需要，一旦项目投入使用（生产环境），便不再需要的依赖，不会被打入包内。安装方式：`npm install <packageName> -D`    
-`peerDependencies`：又称**对等依赖**，不会自动安装的依赖。在`npm install`时不会安装，并且也不会被打入包内，但要求引用这个库的项目安装的依赖，引用者需要自行安装这些依赖。打个比方：某个包`b`的`peerDependencies`中有依赖项`c`，此时项目`a`安装了依赖`b`，那么就必须同时安装依赖`c`。   
 
-**peerDependencies存在的意义是？**  
-
-
-上边抛出的四个问题是依次递进的，前2个问题比较好解答，但为了更好解释后两个问题，所以也列举出来了。
+上述说明回答了第2个问题，因为`devDependencies`不会在构建时打入包内。
 
 ## 4. vm.$refs.xxx获取到了个啥？
 有时候是`VueComponent`，即vue实例，有时候是`element`，即一个`DOM`。
