@@ -76,7 +76,7 @@ siderbar: auto
 2. `vue`在`lib-B`中作为`devDependencies`被安装了，怎么打包的时候没打进去呢？  
 3. 既然`lib-B`依赖了`vue`，那为什么不把`vue`装到`dependencies`里，而是放到了`devDependencies`和`peerDependencies`里？  
 
-## 2.3 `peerDependencies`
+### 2.3 `peerDependencies`
 对`peerDependencies`最直观的一种解释是：  
 > 如果你安装我，那么你最好也安装x,y,z.   
 `peerDependencies`：又称**对等依赖**，不会自动安装的依赖。在`npm install`时不会安装，并且也不会被打入包内，但要求引用这个库的项目安装的依赖，引用者需要自行安装这些依赖。打个比方：某个包`b`的`peerDependencies`中有依赖项`c`，此时项目`a`安装了依赖`b`，那么就必须同时安装依赖`c`。 
@@ -94,7 +94,7 @@ siderbar: auto
 
 上述说明也解释了第3个问题，由于`vue`本身就是一个基础的框架库，当宿主环境安装插件时，通常也会直接依赖`vue`，而在后续`vue`升级出现新特性时只需要更新宿主环境的版本即可。同时将其装在`devDependencies`的原因是确保在构建时插件不会自持`vue`，而是取决于宿主环境的`vue`.  
 
-## 2.4 带一波`dependencies` & `devDependencies` 
+### 2.4 带一波`dependencies` & `devDependencies` 
 **开发环境**：项目尚在编码阶段时的环境。代码中可能还有各种console.log、注释、格式化等。  
 **生产环境**：项目已经完成编码，并发布上线可供用户浏览的阶段时的环境。代码可能经过了压缩、优化等处理。  
 `dependencies`  
