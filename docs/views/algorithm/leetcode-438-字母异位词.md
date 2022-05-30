@@ -51,17 +51,15 @@ var findAnagrams = function(s, p) {
   let hash = {};
   // hash：记录p字符串中每个元素出现的次数，count: p字符串长度
   for(let i = 0; i < p.length; i++) {
-    if(!hash[p[i]]) {
-      hash[p[i]] = 0;
-    }
-    hash[p[i]]++;
+    hash[p[i]] ? hash[p[i]]++ : (hash[p[i]] = 1);
   }
 
   const isValidate = function(temp) {
+    const newHash = { ...hash }; // 每次执行isValidate都需要复制一个新的hash副本，避免下次执行isValidate时hash被修改
     for(let i = 0; i < temp.length; i++) {
       // 包含两种情况：1.temp[i]不是p串中的子元素；2.temp[i]对应的元素个数超出p串中同值的元素个数
-      if(!hash[temp[i]]) return false;
-      hash[temp[i]]--;
+      if(!newHash[temp[i]])  return false;
+      newHash[temp[i]]--;
     }
     return true;
   }
