@@ -1,5 +1,5 @@
 ---
-title: Vue源码学习系列一
+title: Vue源码学习系列一———数据驱动
 date: 2021-06-09
 categories:
  - 前端
@@ -11,6 +11,26 @@ sidebar: auto
 ---
 
 > vue源码系列主要参考了 [Vue.js技术揭秘](https://ustbhuangyi.github.io/vue-analysis/v2/prepare/)，并在展示源码时进行了部分删减，突出关键代码。
+
+## 数据驱动
+Vue.js的一个核心思想就是**数据驱动**。  
+数据驱动，是指视图是由数据驱动生成的，我们对视图的修改，不会直接操作DOM，而是通过修改数据。   
+数据驱动的优势：简化代码量；当交互复杂时，只需关注数据的修改，利于代码维护。   
+使用模板语法将数据渲染成DOM：  
+```html
+<div id="app">
+  {{ message }}
+</div>
+```  
+
+```js
+var app = new Vue({
+  el: '#app',
+  data: {
+    message: 'hello world'
+  }
+})
+```
 
 ## 1. new Vue(options)  
 Vue实际上是一个类，类在JS中使用函数来实现。 
