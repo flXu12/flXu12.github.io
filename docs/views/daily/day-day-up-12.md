@@ -110,6 +110,93 @@ var trim = function(str) {
 | dir | 指定元素中文本方向 | 该属性值：`ltr`，从左到右；`rtl`，从右到左；`auto`，由用户代理决定方向 |  
 | autocapitalize | 控制用户的文本输入是否/如何自动大写 | 该属性值：`off`或`none`，所有字母默认小写；`on`或`sentences`，每个句子的第一个字母默认大写，其它字母默认小写；`words`，每个单词的第一个字母默认大写；`characters`,所有字母默认大写 |  
 
+## 4. 在页面上隐藏元素的方法？
+| 方法 | 描述 | 说明 |  
+| ---- | ---- | ---- |  
+| `display: none;` | - | 不占位，该元素及其子元素都不可见。 |  
+| `opacity: 0;` | 设置元素不透明度为0，即完全透明 | 占位 |  
+| `visibility: hidden;` | 隐藏元素，但其它元素布局不变，相当于此元素变成透明 | 若将其子元素设置`visibility: visible`，则其子元素依然可见 |  
+| `z-index: -999999999` | 将元素放到最底层, 可以让其它元素将其遮住 | - |  
+| `position: absolute;transform: scale(0)` | 让元素脱标，设置元素缩放值为0，即元素大小为0 | - |  
+| `margin-left: -100%;` | 让元素的位置在当前视口之外 | - |  
+| `position: relative; left: -100%;` | 让元素的位置在当前视口之外 | - |  
+| `width: 0; height: 0; overflow: hidden;` | - | 不占位 |   
+| `text-indent: -9999px;` | 设置块元素首行文本内容之前的缩进量为负数，使其超出当前视口 | 仅针对块内文本元素 |   
+| `font-size: 0;` | - | 仅针对块内文本元素 |  
 
+## 5. 去除字符串中最后一个指定的字符
+### 5.1 正则  
+```js
+/**
+ * @param {string} str
+ * @param {string} char
+ * @return {string}
+**/ 
+var deleteSpecificLastCharacter = function(str, char) {
+  const reg = new RegExp(`${char}(?=([^${char}]*)$)`);
+  return str.replace(reg, '');
+}
+```  
+**说明**：  
+- (?=p): 匹配`p`前面的位置。其中`p`是一个子模式  
+- ^：匹配开头  
+- $：匹配结尾  
+- *：匹配表达0次或多次  
+### 5.2 lastIndexOf
+```js
+/**
+ * @param {string} str
+ * @param {string} char
+ * @return {string}
+**/ 
+var deleteSpecificLastCharacter = function(str, char) {
+  const index = str.lastIndexOf(char);
+  return str.substring(0, index) + str.substring(index + 1, str.length);
+}
+```  
+### 5.3 旋转字符串  
+```js
+/**
+ * @param {string} str
+ * @param {string} char
+ * @return {string}
+**/ 
+var deleteSpecificLastCharacter = function(str, char) {
+  return str.split('').reverse().join('').replace(char, '').split('').reverse().join('')
+}
+```  
+## 6. 变量命名：下划线转大驼峰
+```js
+/**
+ * @param {string} str
+ * @return {string}
+**/ 
+var toCamel = function(str) {
+  return str.replace(/_(\w)/g, (match, $1) => {
+    return $1 ? $1.toUpperCase() : match;
+  })
+}
+```
 
+## 7. 超链接`target`属性的取值
+| 值 | 描述 |  
+| ---- | ---- |  
+| `_blank` | 在新窗口中打开被链接文档 |  
+| `_self` | 默认值。在当前窗口或者框架中加载目标文档 |  
+| `_parent` | 在父框架集中打开被链接文档。当 a 标签本身在顶层时，则与 _self 相同 |  
+| `_top` | 在整个窗口中打开被链接文档 |  
+| framename | 在指定的框架中打开被链接文档 |  
+| 任意字符 | 如果当前浏览器还没有打开这个链接，则会弹出新窗口打开此链接；如果已经打开了这个链接，则不会再重复弹出第二个窗口，而是刷新已打开的窗口链接 | 
 
+## 8. 切换字符串大小写  
+```js
+/**
+ * @param {string} str
+ * @return {string}
+**/  
+var caseConvert = function(str) {
+  return str.replace(/([a-z]*)([A-Z]*)/g, (match, $1, $2) => {
+    return `${$1.toUpperCase()}${$2.toLowerCase()}`
+  });
+}
+```
