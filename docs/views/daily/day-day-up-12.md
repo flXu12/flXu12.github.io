@@ -252,7 +252,7 @@ accessKey属性所设置的快捷键不能与浏览器的快捷键冲突，否�
 **示例**：  
 ![](../images/daily-040.png)  
 
-**正则**：
+**正则**：  
 `\n`: 匹配换行符（new line）    
 `\r`: 匹配回车符（return）    
 `\t`: 匹配制表符（tab）    
@@ -285,3 +285,109 @@ var removeTN = function(str) {
 - 增加服务器的请求开销：iframe某种意义上是独立的页面，会有自己的css/js资源请求，当iframe多的时候，会伴随更多的服务器请求资源消耗  
 - 降低用户体验：iframe框架容易出现横/纵向滚动条，分散用户的注意力；并且有滚动条时若需要打印页面，无法打印出完整内容  
 - iframe会阻塞主页面的onload事件：window.onload事件会在所有iframe加载完成后才会出发，造成页面阻塞
+
+## 13. CSS之BFC
+BFC全称**块级格式化上下文（Blok Formatting Context）**。BFC类似一个“结界”，如果一个DOM元素具有BFC，那么它内部的子元素不会影响外面的元素；外面的元素也不会影响到其内部元素。  
+### 13.1 特性  
+- 计算BFC的高度时，其浮动子元素也参与计算  
+- BFC时页面上的一个隔离的独立容器，容器里面的子元素不会影响到外面的元素；反之亦然  
+- BFC的区域不会与float元素重叠
+
+### 13.2 形成条件
+- html根元素  
+- 浮动元素：float的值不是none  
+- 绝对定位元素：position为absolute或fixed  
+- 内联块：display为inline-block  
+- overflow不为visible  
+- 弹性元素：display为flex或inline-flex元素的直接子元素    
+- 网格元素：display为grid或inline-grid元素的直接子元素  
+- 表格单元格元素：display为table、table-row、table-row-group、table-header-group、table-footer-group（分别对应table、tr、tbody、thead、tfoot标签的默认样式）、inline-table  
+
+### 13.4 BFC的应用场景
+- 解决外边距重叠问题：同属一个BFC的块级盒子在垂直方向会发生margin重叠，可以将其中一个盒子放入另一个BFC中以解决重叠问题。  
+- 解决高度塌陷问题：由于浮动子元素导致父元素高度坍塌，可以将父元素变成一个BFC元素  
+
+## 14. 计算某一个字符或字符串在另一个字符串中出现的次数
+示意：  
+![](../images/daily-041.png)  
+
+**正则**：  
+```js
+/**
+ * @param {string} str
+ * @param {string} target 
+ * @return {number}
+ */ 
+var substrCount = function(str, target) {
+  const reg = new RegExp(target, 'g');
+  return (str.match(reg)).length;
+}
+```
+
+**数组拆分**：  
+```js
+/**
+ * @param {string} str
+ * @param {string} target 
+ * @return {number}
+ */ 
+var substrCount = function(str, target) {
+  return str.split(target).length - 1;
+}
+```
+
+## 15. HTML5离线缓存  
+通过离线存储，我们可以在离线的情况下，也能让用户正常访问Web App。  
+
+### 15.1 Application Cache（应用程序缓存）——【<font color="red">不推荐，似乎已废弃</font>】  
+可以在离线情况下，通过cache manifest文件，创建离线应用。    
+**使用**：  
+1. 在html文件的html标签上添加manifest属性。属性值为一个.appcache文件   
+2. 在.appcache文件中声明清单文件。包含三个部分：CACHE（表示需要离线缓存的资源列表）、NETWORK（表示在线才能访问的资源列表）、FALLBACK（缓存失败后使用的文件）  
+3. 在服务器添加MIME-type配置为"text/cache-manifest"  
+**缺点**：  
+- 需要遵循诸多规范，不易控制
+
+### 15.2 Service Workers  
+我们通常所说的Service Worker指的是Service Worker线程。  
+浏览器中执行的JavaScript文件时运行在一个单一线程上，称之为**主线程**。而Service Worker是一种独立于浏览器主线程的**工作线程**，与主线程师完全隔离的，并且有自己独立的执行上下文（context）。  
+
+**原理**：  
+Service Worder从被注册开始，就会经历自身的一些生命周期，在这写生命周期中可以去做一些特定的事情，比如复杂的计算、缓存的写入、缓存的读取等。   
+Service Worker生命周期（参考：[pwa-book](https://lavas-project.github.io/pwa-book/chapter04/3-service-worker-dive.html)）：  
+![](../images/daily-042.png)   
+1. 在主线程成功注册 Service Worker 之后，开始下载并解析执行 Service Worker 文件，执行过程中开始安装 Service Worker，在此过程中会触发 worker 线程的 install 事件。    
+2. 如果 install 事件回调成功执行（在 install 回调中通常会做一些缓存读写的工作，可能会存在失败的情况），则开始激活 Service Worker，在此过程中会触发 worker 线程的 activate 事件，如果 install 事件回调执行失败，则生命周期进入 Error 终结状态，终止生命周期。  
+3. 完成激活之后，Service Worker 就能够控制作用域下的页面的资源请求，可以监听 fetch 事件。  
+4. 如果在激活后 Service Worker 被 unregister 或者有新的 Service Worker 版本更新，则当前 Service Worker 生命周期完结，进入 Terminated 终结状态。  
+
+**使用**：  
+假设当先项目存在如下目录：  
+```txt
+.
+└── serviceWorkerDemo
+    ├── index.html
+    └── sw.js
+```  
+其中，index.html文件内容：  
+```html
+<!DOCTYPE html>
+  <head>
+    <title>Service Worker Demo</title>
+  </head>
+  <body>
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js')； // 注册Service Worker
+      }
+    </script>
+  </body>
+</html>
+```  
+
+**[Service Worker Demo](https://github.com/mdn/sw-test)**
+
+
+
+
+
