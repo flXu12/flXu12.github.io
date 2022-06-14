@@ -200,3 +200,88 @@ var caseConvert = function(str) {
   });
 }
 ```
+
+## 9. `<label>`标签有哪些作用?  
+`<label>`标签用于表示用户界面中某个元素的说明。  
+### 9.1 for  
+使用for属性，与表单元素结合，关联表单控件，使表单元素获得焦点。更利于使用辅助技术的用户理解需要输入哪些数据。    
+```html
+<label for="username">username</label>
+<input id="username" type="text">
+```  
+for属性值须与表单元素的id属性值一致。
+### 9.2 accesskey 
+访问label标签所绑定的热键，当你按下热键时，所绑定的元素将获得焦点。  
+```html
+<label for="inputBox" accesskey="N">name</label>
+<input id="inputBox" type="text">
+```  
+accessKey属性所设置的快捷键不能与浏览器的快捷键冲突，否则将优先激活浏览器的快捷键。
+
+## 10. 用css绘制一个三角形
+**原理**：创建一个div，宽高都为0，并设置4个边框的`border-width`, `border-style`, `border-color`即可。如果要某个三角形变为透明，可设置`border-color: transparent`。  
+**效果图**：  
+![](../images/daily-039.png)
+
+**代码**：  
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>demo</title>
+<style>
+  .rect {
+    width: 0;
+    height: 0;
+    border-top: 100px solid red;
+    border-right: 100px solid yellow;
+    border-bottom: 100px solid blue;
+    border-left: 100px solid black;
+  }
+</style>
+</head>
+<body>
+	<div class="rect">
+  </div>
+</body>
+</html>
+```
+
+## 11. 去除字符串中的制表符和换行符  
+**示例**：  
+![](../images/daily-040.png)  
+
+**正则**：
+`\n`: 匹配换行符（new line）    
+`\r`: 匹配回车符（return）    
+`\t`: 匹配制表符（tab）    
+`\b`: 匹配退格符（backspace）    
+`\f`: 匹配换页符  
+`\v`: 匹配垂直制表符  
+`\s`: 匹配空白符（space），包括<font color="#008dff">空格、水平制表符、垂直制表符、换行符、回车符、换页符</font>  
+
+```js
+/**
+ * @param {string} str
+ * @return {string} 
+ */
+var removeTN = function(str) {
+  return str.replace(/\t|\n/g, '');
+}
+```
+
+## 12. `iframe`有哪些优缺点？  
+**是什么？**
+`<iframe>`标签:内联框架元素，表示嵌套的[浏览器上下文](https://developer.mozilla.org/zh-CN/docs/Glossary/Browsing_context)。它能够将另一个HTML页面嵌入到当前页面中。  
+**优点**  
+- iframe能够原封不动地将嵌入的网页展示出来  
+- 增加代码的复用性：如果有多个网页饮用了相同的iframe，那么只需要修改iframe的内容，即可实现所有页面的同步更新  
+- 异步刷新：单个iframe刷新不会影响整体窗口的刷新。可以将加载缓慢的图片或其他资源放到iframe中加载    
+- 可以跨域：每个iframe的源都可以不相同，以方便引入第三方内容  
+
+**缺点**  
+- 不利于SEO：浏览器搜索引擎不能很好地处理iframe中的内容，因此不利于引擎优化  
+- 增加服务器的请求开销：iframe某种意义上是独立的页面，会有自己的css/js资源请求，当iframe多的时候，会伴随更多的服务器请求资源消耗  
+- 降低用户体验：iframe框架容易出现横/纵向滚动条，分散用户的注意力；并且有滚动条时若需要打印页面，无法打印出完整内容  
+- iframe会阻塞主页面的onload事件：window.onload事件会在所有iframe加载完成后才会出发，造成页面阻塞
