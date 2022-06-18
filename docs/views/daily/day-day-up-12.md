@@ -422,6 +422,99 @@ Service Worker生命周期（参考：[pwa-book](https://lavas-project.github.io
 当业务均能支持时：  
 若低版本用户居多，则优先采用渐进增强的开发流程；若高版本用户居多，为了提高大多数用户的使用体验，则优先采用优雅降级的开发流程。
 
+## 17.这段代码执行时，引擎做了哪些事？
+**关键字**： 原型继承。  
+
+```js
+var obj = { name: 'sven' };
+
+var A = function(){};
+A.prototype = obj;
+
+var a = new A();
+console.log(a.name);  // 输出：sven
+```     
+1. 尝试遍历对象 a 中的所有属性，但没有找到 name 这个属性  
+2. 找 name 属性的这个请求被委托给对象 a 的构造器的原型，它被 a.__proto__ 记录着并且
+指向 A.prototype，而 A.prototype 被设置为对象 obj   
+3. 在对象 obj 中找到了 name 属性，并返回它的值  
+
+```js
+var A = function(){};
+A.prototype = { name: 'sven' };
+
+var B = function(){};
+B.prototype = new A();
+
+var b = new B();
+console.log(b.name); // 输出：sven
+```  
+1. 尝试遍历对象 b 中的所有属性，但没有找到 name 这个属性  
+2. 查找 name 属性的请求被委托给对象 b 的构造器的原型，它被 b.__proto__ 记录着并且指向 B.prototype，而 B.prototype 被设置为一个通过 new A()创建出来的对象  
+3. 在该对象中依然没有找到 name 属性，于是请求被继续委托给这个对象构造器的原型 A.prototype  
+4. 在 A.prototype 中找到了 name 属性，并返回它的值
+
+## 18. 数组扁平化
+已知有如下嵌套数组，编写一个程序将数组扁平化处理，去重，升序。  
+```js
+// 原始数组
+var array = [1, 2, 3, [4, 3, [2, 7], 2], 5, [5, 9, 10], 7]
+// 扁平化处理后的数组
+array = [1, 2, 3, 4, 3, 2, 7, 2, 5, 5, 9, 10, 7]
+// 去重、升序后：
+array = [1, 2, 3, 4, 5, 7, 9, 10]
+```  
+扁平化：
+【法一】：Array.prototype.forEach  
+```js
+function flatten(array) {
+  var result = [];
+  array.forEach(item => {
+    if(Array.isArray(item)) {
+      result = result.concat(flatten(item));
+    } else {
+      result.push(item;)
+    }
+  });
+  return result;
+}
+```  
+【法二】：Array.prototype.reduce
+```js
+function flatten(array) {
+  return array.reduce((pre, item) => {
+    return pre.concat(Array.isArray(item) ? flatten(item) : item);
+  }, [])
+}
+```  
+【法三】：Array.prototype.flat
+```js
+function flatten(array) {
+  return array.flat(Infinity);
+}
+```  
+【法四】：Array.prototype.toString  
+```js
+function flatten(array) {
+  return array.toString().split(',');
+}
+```  
+【法五】：ES6扩展运算符,展开每一个类型为数组的元素
+```js
+function flatten(array) {
+  while(array.some(item => Array.isArray(item))) {
+    array = [].concat(...array)
+  }
+  return array
+}
+```
+去重、升序:  
+```js
+function handle(array) {
+  return Array.from(new Set(array)).sort((a, b) => { return a-b; })
+}
+```
+
 
 
 
