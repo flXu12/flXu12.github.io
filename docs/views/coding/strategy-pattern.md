@@ -241,3 +241,98 @@ registerForm.onsubmit = function() {
   }
 }
 ```
+
+**实现三**：一个表单项有多个校验规则   
+```html
+<html>
+  <body>
+    <form action="http:// xxx.com/register" id="registerForm" method="post">
+      请输入用户名：<input type="text" name="userName"/ >
+      请输入密码：<input type="text" name="password"/ >
+      请输入手机号码：<input type="text" name="phoneNumber"/ >
+      <button>提交</button>
+    </form>
+    <script>
+      // 策略对象
+      const strategies = {
+        isNotEmpty: function(value, errorMsg) {
+          if(value === '') {
+            return errorMsg;
+          }
+        },
+        minLength: function(value, length, errorMsg) {
+          if(value.length < length) {
+            return errorMsg;
+          }
+        },
+        isMobile: function(value, errorMsg) {
+          if(!/(^1[3|5|8][0-9]{9}$)/.test(value)) {
+            return errorMsg;
+          }
+        }
+      }
+
+      // Validator类
+      const Validator = function() {
+        this.cache = [];
+      }
+      Validator.prototype.add = function(dom, rules) {
+        const self = this;
+        for(let i = 0, rule; rule = rules[i++]) {
+          (function(rule) {
+            const strategyArr = rule.strategy.split(':');
+            const errorMsg = rule.errorMsg;
+
+            self.cache.push(function() {
+              const stragety = strategyArr.shift();
+              strategyArr.unshift(dom.value);
+              strategyArr.push(errorMsg);
+              return strategies[strategy].apply(dom, strategyArr);
+            })
+          })(rule)
+        }
+      }
+      Validator.prototype.start = function() {
+        for(let i = 0, validatorFunc; validatorFunc = this.cache[i++];) {
+          const errorMsg = validatorFunc();
+          if(errorMsg) {
+            return errorMsg;
+          }
+        }
+      }
+
+      // 用户调用代码
+      const registerForm = document.getElementById( 'registerForm' ); 
+      const validatorFunc = function() {
+        const validator = new Validator();
+        validator.add(registerForm.userName,  [{
+          strategy: 'isNonEmpty',
+          errorMsg: '用户名不能为空'
+          }, {
+          strategy: 'minLength:6',
+          errorMsg: '用户名长度不能小于 10 位'
+          }]);
+        validator.add( registerForm.password, [{
+          strategy: 'minLength:6',
+          errorMsg: '密码长度不能小于 6 位'
+          }]);
+        validator.add( registerForm.phoneNumber, [{
+          strategy: 'isMobile',
+          errorMsg: '手机号码格式不正确'
+          }]);
+          
+        const errorMsg = validator.start();
+        return errorMsg; 
+      }
+
+      registerForm.onsubmit = function() {
+        const errorMsg = validataFunc();
+        if ( errorMsg ) {
+          alert ( errorMsg );
+          return false;
+        } 
+      }
+    </script>
+  </body>
+ </html>
+```
