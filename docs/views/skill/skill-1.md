@@ -1,10 +1,11 @@
 ---
-title: 工具小技巧
+title: 工具小技巧和常见问题
 date: 2022-12-08
 categories:
- - 技巧
+ - 技巧  
 tags:
- - 技巧
+ - 技巧  
+ - git
 siderbar: auto
 ---
 
@@ -41,5 +42,16 @@ siderbar: auto
  2. 搜索exclude，删掉需要展示在目录中的模式即可  
  ![](../images/skill-001.png) 
 
- 
+ ## 3. 执行git操作时，报错【WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED! fatal: Could not read from remote repository】  
+在执行`git pull`或`git push`等操作，从远程拉取代码或将代码推送到远程仓库时，报错如下：   
+ ![](../images/skill-002.png)   
+
+ 出现这个问题的原因是git远程仓库的域名/IP信息发生了变更，解决：    
+ **法一：粗暴法**    
+ 找到报错信息中显示的`/xxx/yyy/.ssh/known_hosts`文件, 将其清空，或直接删掉这个文件。  
+
+ **法二：**   
+ 还是找到`/xxx/yyy/.ssh/known_hosts`文件，根据错误信息提示的`zzz.fff.cn`发生了变更，则去掉这个域名对应的信息即可。
+
+
 
