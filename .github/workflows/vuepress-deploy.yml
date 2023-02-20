@@ -11,7 +11,7 @@ jobs:
       # 使用别人写好的一个action
       uses: jenkey2011/vuepress-deploy@master
       env:
-        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        ACCESS_TOKEN: ${{ secrets.FLXU12 }}
         TARGET_REPO: flXu12/flXu12.github.io
         TARGET_BRANCH: gh_pages
         BUILD_SCRIPT: yarn && yarn build
