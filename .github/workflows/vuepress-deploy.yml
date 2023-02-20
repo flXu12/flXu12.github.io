@@ -5,10 +5,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@main
+      uses: actions/checkout@master # 也是一个写好的action，用于切换分支
 
-    - name: Build and Deploy
-      uses: jenkey2011/vuepress-deploy@main
+    - name: vuepress-deploys
+      # 使用别人写好的一个action
+      uses: jenkey2011/vuepress-deploy@master
       env:
         ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         TARGET_REPO: flXu12/flXu12.github.io
