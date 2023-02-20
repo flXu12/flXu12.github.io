@@ -9,6 +9,7 @@ tags:
 siderbar: auto
 ---
 
+> 越智能的系统，一旦产生错误就会越致命也越不容易发现。
 
  ## 1. vscode自动编译ts
 1. 编译配置文件： tsconfig.json 
@@ -52,6 +53,16 @@ siderbar: auto
 
  **法二：**   
  还是找到`/xxx/yyy/.ssh/known_hosts`文件，根据错误信息提示的`zzz.fff.cn`发生了变更，则去掉这个域名对应的信息即可。
+
+ ## 4. 如何知道你浏览的网站是否使用了core-js？
+ 最近core-js的作者发了一篇长文聊到因为维护开源库core-js导致自己面临极端困境（原文：[github](https://github.com/zloirock/core-js/blob/master/docs/2023-02-14-so-whats-next.md)，翻译版：[知乎](https://zhuanlan.zhihu.com/p/606834790)）。  
+ 其中提到了一种检测站点是否使用了core-js的方法：  
+ ```js
+ // 在浏览器控制台输入
+ window['__core-js_shared__']
+ ```  
+
+![](../images/skill-003.png)
 
 
 
