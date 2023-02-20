@@ -23,4 +23,8 @@ siderbar: auto
  当我们需要访问服务器，通过终端执行命令时，可以使用： [mobalXterm](https://mobaxterm.mobatek.net/)  
 
  ## 4. 【工具】可视化终端工具
- 当我们需要访问服务器，但是对终端命令不熟悉，需要做一些上传/下载文件的操作时，可以使用： [FileZilla](https://www.filezilla.cn/download)  
+ 当我们需要访问服务器，但是对终端命令不熟悉，需要做一些上传/下载文件的操作时，可以使用： [FileZilla](https://www.filezilla.cn/download)   
+ 这是一款快速可靠的、跨平台的FTP,FTPS和SFTP客户端。具有图形用户界面(GUI)和很多有用的特性。
+
+ ## 5. 【工具】效率工具平台
+ 一款轻量、安全、简洁的效率工具平台，可以自由安装插件应用：[uTools](https://www.u.tools/)
