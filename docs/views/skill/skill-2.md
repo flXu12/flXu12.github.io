@@ -28,3 +28,14 @@ siderbar: auto
 
  ## 5. 【工具】效率工具平台
  一款轻量、安全、简洁的效率工具平台，可以自由安装插件应用：[uTools](https://www.u.tools/)
+
+ ## 6. 手动打开chrome控制台Vue devtools
+ 通常使用vue框架开发前端项目时，chrome浏览器都会安装vue.js devtools扩展插件，然后在开发环境下查看组件的状态或事件等信息：  
+ ![](../images/skill-004.png)  
+
+ 但有时候这个插件不太听话，或者因为框架层做了一些限制导致插件不能正常加载，此时可以在chrome控制台输入如下信息，然后关闭-打开chrome控制台就可以看到插件被正常加载了：  
+   
+ ```js
+window.__vue__.config.devtools = true;
+__VUE_DEVTOOLS_GLOBAL_HOOK__.emit('init', window.__vue__);
+```
