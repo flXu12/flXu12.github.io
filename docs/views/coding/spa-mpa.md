@@ -29,5 +29,76 @@ MPA(multiple page application，即：多页面应用)，每个页面都是一�
 
 ## 2. 最简实现
 ### 2.1 SPA最简实现
+```js
+// Router: 通过监听url中的hash来进行路由跳转
+class Router {
+  constructor (){
+    this.routes = {};  // // 存放路由path及callback
+    this.cuttentUrl = '';
 
-### 2.2 MPA最简实现
+    // 监听路由change调用相对应的路由回调
+    window.addEventListener('load', this.refresh, false);
+    window.addEventListener('hashchange', this.refresh, false);
+  }
+
+  route(path, callback) {
+    this.routes[path] = callback;
+  }
+
+  push(path) {
+    this.routes[path] && this.routes?.[path]();
+  }
+}
+```  
+使用：  
+```js
+window.miniRouter = new Router();
+miniRouter.route('/', () => console.log('page1'));
+miniRouter.route('/page2', () => console.log('page2'));
+
+miniRouter.push('/');  // page1
+miniRouter.push('/page2'); // page2
+```
+
+### 2.2 MPA最简实现  
+借用 HTML5 history API:  
+- `history.pushState` 浏览器历史纪录添加记录  
+- `history.replaceState` 修改浏览器历史纪录中当前纪录   
+
+通过`window.onpopstate`事件处理浏览器回退。
+```js
+// Router
+class Router {
+  constructor () {
+    this.routes = {};
+    
+    // 监听popstate事件
+    window.addEventListener('popstate', event => {
+      const path = event.state?.path;
+      this.routes[path] && this.routes[path]();
+    })
+  }
+
+  init(path) {
+    history.replaceState({ path }, null, path);
+    this.routes[path] && this.routes[path]();
+  }
+
+  route(path, callback) {
+    this.routes[path] = callback;
+  }
+
+  push(path) {
+    history.pushState({ path }, null, path);
+    this.routes[path] && this.routes[path]();
+  }
+}
+```  
+使用：  
+```js
+window.miniRouter = new Router();
+miniRouter.route('/', () => console.log('page1'));
+miniRouter.route('/page2', () => console.log('page2'));
+
+miniRouter.push('/page2'); // page2
+```
