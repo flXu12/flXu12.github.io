@@ -10,5 +10,7 @@ siderbar: auto
 
 
 ## 1. 实现函数缓存 lodash---memoize  
+TODO
 
-## 2. Vue组件中的data属性为什么是一个函数，而不是一个对象？
+## 2. Vue组件中的data属性为什么是一个函数，而不是一个对象？  
+TODO
