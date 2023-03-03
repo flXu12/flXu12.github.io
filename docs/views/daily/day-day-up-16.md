@@ -60,3 +60,11 @@ export default {
 ```  
 最终展示效果：  
 ![](../images/daily-046.png)
+
+## 2. 如何给所有的async函数添加错误处理？
+在日常开发中我们经常使用异步函数，通过async函数返回一个Promise对象，其中await后面的Promise对象运行结果可能是rejected，因此一般情况下推荐将其放到try...catch代码块中。  
+但由于每个人的开发习惯不同，在团队协作时无法确保所有的async函数都正确地添加了错误处理逻辑，因此如何全局添加这种逻辑，就是本节主题所在。  
+
+关键词：   
+- window.addEventListener("unhandledrejection", event => {});  
+- babel插件 AST树
