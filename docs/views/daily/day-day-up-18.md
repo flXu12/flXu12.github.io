@@ -8,7 +8,7 @@ tags:
 siderbar: auto
 ---
 
-> 存档去年，期待新年。
+> 存档去年，喜迎新年。
 
 ## 1. 研发说：这个定时任务是幂等的  
 
@@ -46,6 +46,65 @@ increment(5);  // 第二次调用，结果为10
 在设计系统或函数时，如果可能，应该尽量使其具有幂等性，因为这样可以提高系统的可靠性、安全性和可维护性。  
 对于非幂等的操作，通常需要额外的机制来防止副作用或不一致性的产生，例如通过使用事务、版本控制或唯一性验证等手段。
 
-## 2. 为啥setTimeout没有终止定时任务？  
-原始需求描述：离线用户首次登录并访问某页面时，前端界面会展示一个进度条，用于表示后台任务执行进度。用户也可以选择点击【取消】按钮终止后台任务，此时需要显示另一个界面。    
-来看看原始代码实现：  
+## 2. 请听好，定时任务终止后务必重置timer！
+最近看到了一段这样的代码：    
+
+```js
+let timer = null;
+let ind = 0;
+function startLoop() {
+  if(timer) {
+    console.log(`timer未清空 -> ${timer}`);
+    return;
+  }
+  timer = setInterval(loopProgress, 1000);
+}
+
+function loopProgress() {
+  console.log(`${timer}, execute ${ind++}`);
+}
+
+function cancelLoop() {
+  timer && clearInterval(timer);
+  console.log(timer);
+}
+```
+
+请在浏览器控制台输入上述代码，首先执行`startLoop`，待打印几次后再执行`cancelLoop`，你会发现神奇的现象（不是每次都出现但出现概率极高噢）： 
+- 定时任务终止，但timer未被设置成null？？？   
+
+![](../images/daily-056.png)   
+
+- 再次执行`startLoop`，未开启定时任务？？？  
+
+![](../images/daily-057.png)  
+
+查看了MDN文档，发现使用`clearInterval`或`clearTimeout`只会取消定时器，不会重置timer，导致再次尝试启用定时器时，由于timer判断falsy导致启用失败。
+
+优化后代码：  
+
+```js{17}
+let timer = null;
+let ind = 0;
+function startLoop() {
+  if(timer) {
+    console.log(`timer未清空 -> ${timer}`);
+    return;
+  }
+  timer = setInterval(loopProgress, 1000);
+}
+
+function loopProgress() {
+  console.log(`${timer}, execute ${ind++}`);
+}
+
+function cancelLoop() {
+  timer && clearInterval(timer);
+  timer = null;
+  console.log(timer);
+}
+```
+
+## 3. 【lodash踩坑系列】多实例组件使用once仅触发一次噢
+
+## 4. 【vue踩坑系列】$attrs属性被删除时，子组件依然能获取到属性，且值为undefined
