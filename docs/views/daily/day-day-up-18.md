@@ -1,6 +1,6 @@
 ---
 title: 【day day up系列】2024年01月学习笔记
-date: 2023-01-22
+date: 2024-01-22
 categories:
   - 日常
 tags:
@@ -105,6 +105,267 @@ function cancelLoop() {
 }
 ```
 
-## 3. 【lodash踩坑系列】多实例组件使用once仅触发一次噢
+### 小结  
+每次使用`clearInterval`或`clearTimeout`后，需要及时重置`timerID`。
 
-## 4. 【vue踩坑系列】$attrs属性被删除时，子组件依然能获取到属性，且值为undefined
+## 3. 【lodash踩坑系列】多实例组件使用once仅触发一次噢
+### 前置信息
+**`lodash`**：一个应用非常普遍的js库，提供了丰富的工具函数帮助开发人员处理数组、对象、字符串等数据类型，可以简化代码复杂度，减少代码量和潜在bug。  
+**`once(func)`**：创建一个只能调用 func 一次的函数。 重复调用返回第一次调用的结果。 func 调用时， this 绑定到创建的函数，并传入对应参数。  
+ - 参数: func（Function），指定的触发函数。   
+ - 返回：（function），一个新的受限函数。
+
+使用举例：  
+
+```js
+const once = require('lodash/once');
+
+function sayHello() {
+  console.log('hello');
+}
+
+const onceFunc = once(sayHello);
+
+onceFunc();  // 第一次执行onceFunc()，打印'hello'
+onceFunc();  // 第二次执行onceFunc()，不会执行sayHello()，也不会打印'hello'
+
+```  
+
+![](../images/daily-036.gif)  
+
+### 问题描述
+vue项目某页面使用了一个公共组件A，用户可以自定义添加多个卡片在界面进行展示，卡片内是组件A。用户通过鼠标拖拽卡片右下角来调整宽高，卡片内组件A宽高期望能自适应调整（参考仪表板业务场景）。页面布局如下：  
+
+![](../images/daily-058.png)  
+
+问题说明：
+当页面引用多个组件A时，调整卡片高度后，组件A的高度不会自适应。
+
+### 排查路径
+1. 查看控制台有无组件相关的报错或警告 => 无   
+2. 尝试调整数据量，对每个卡片进行拖拽，确认是否所有组件A都异常 => 发现仅一个是正常的，其余都异常！   
+3. 删除所有组件A仅保留一个，再调整卡片高度，确认是否异常 => 否    
+4. 通过vue devtools查看组件A接收的props属性是否有区别 => 无    
+5. 继续查看组件A内部与高度相关的属性是否有差异 => 有   
+6. 查看组件A源码，找到高度计算相关逻辑，debugger    
+7. 发现组件A内部在初始化时使用`once`添加了一个resize监听器，用于监听父元素高度变化，从而实现高度自适应填充与布局更新   
+8. 在`once`执行前debugger，发现只有第一个完成初始化的组件A会执行`once`内的监听函数，其后所有组件A均没有成功添加监听   
+
+相关逻辑如下：
+
+```js{15,26}
+import { once } from 'lodash';
+import { addResizeListener } from './utils';  // 监听器实现工具方法，不是重点。
+
+export default {
+  data() {
+    return {
+      height: null
+    }
+  }
+},
+mounted() {
+  this.setHeight();
+},
+methods: {
+  addParentNodeResizeListener: once(function() {
+    const parentNode = this.$el.parentNode;
+    if(!parentNode) return;
+    addResizeListener(parentNode, this.setHeight);
+  }),
+  setHeight() {
+    this.$nextTick(() => {
+      const parentNode = this.$el.parentNode;
+      if(!parentNode) return;
+      
+      this.height = parentNode.clientHeight;
+      this.addParentNodeResizeListener(); 
+    })
+  },
+}
+```  
+
+代码执行说明：  
+- 第一个注册的组件A（后续称A1），在mounted中第一次执行`setHeight` -> `addParentNodeResizeListener` -> `addResizeListener`，成功添加监听器。   
+- 其后注册的组件A（后续称A2），由于`addParentNodeResizeListener`已经执行过一次，不会再执行，故在mounted执行的路径为`setHeight`，不会添加监听器。   
+- 若之后用户手动拖拽A1卡片，会再次执行`setHeight`，但由于此前`addParentNodeResizeListener`已经执行过一次，故仅会更新`height`属性，从而实现高度自适应。  
+- 接着用户手动拖拽A2卡片，由于没有执行添加监听器函数，故不会执行`setHeight`，进而导致高度不会自适应。  
+
+### 解决方案  
+从上述排查分析可知，异常原因是所有组件A的实例公用了`addParentNodeResizeListener`。因此，只要每个组件A在注册后都能执行一次`addParentNodeResizeListener`，就可以分别添加各自的监听器，从而实现高度自适应。  
+
+修改后的代码：  
+
+```js{12,18}
+import { once } from 'lodash';
+import { addResizeListener } from './utils';  // 监听器实现工具方法，不是重点。
+
+export default {
+  data() {
+    return {
+      height: null
+    }
+  }
+},
+created() {
+  this.addParentNodeResizeListener = once(this._addParentNodeResizeListener);
+},
+mounted() {
+  this.setHeight();
+},
+methods: {
+  _addParentNodeResizeListener() {
+    const parentNode = this.$el.parentNode;
+    if(!parentNode) return;
+    addResizeListener(parentNode, this.setHeight);
+  },
+  setHeight() {
+    this.$nextTick(() => {
+      const parentNode = this.$el.parentNode;
+      if(!parentNode) return;
+      
+      this.height = parentNode.clientHeight;
+      this.addParentNodeResizeListener(); 
+    })
+  },
+}
+```   
+
+关注第12行代码，确保每个组件注册时都会声明一个`once`函数`addParentNodeResizeListener`，这个函数中的`once`绑定的是当前实例的`_addParentNodeResizeListener`方法，因此每个组件实例的`addParentNodeResizeListener`都是独一无二的，从而都可成功添加resize监听。  
+
+另一个思路： 根因是`once`函数被复用了，那么只要将其执行的上下文分别绑定到各个组件A实例即可实现监听。  
+
+代码如下：  
+
+```js{1,15}
+import { once, bind } from 'lodash';
+import { addResizeListener } from './utils';  // 监听器实现工具方法，不是重点。
+
+export default {
+  data() {
+    return {
+      height: null
+    }
+  }
+},
+mounted() {
+  this.setHeight();
+},
+methods: {
+  addParentNodeResizeListener: bind(once(function() {
+    const parentNode = this.$el.parentNode;
+    if(!parentNode) return;
+    addResizeListener(parentNode, this.setHeight);
+  }), this),
+  setHeight() {
+    this.$nextTick(() => {
+      const parentNode = this.$el.parentNode;
+      if(!parentNode) return;
+      
+      this.height = parentNode.clientHeight;
+      this.addParentNodeResizeListener(); 
+    })
+  },
+}
+```
+
+### 小结  
+once用法需谨慎，否则排查两行泪~~
+
+## 4. 【vue踩坑系列】$attrs属性被删除时，子组件依然能获取到属性  
+
+### 结论先行
+Vue在更新`$attrs`时，会保留之前传递的所有属性，即使这些属性被删除了。
+
+Vue官方文档：  
+> `$attrs`包含了父作用域中不作为props被识别（且获取）的`attribute`绑定（不含`class`和`style`）。当组件未声明任何`props`时，这里会包含所有父作用域的绑定，并且可以通过`v-bind="$attrs"`传入内部组件。  
+
+### 背景信息
+vue项目，父组件A中引用了子组件B，其中B接收三个props分别为propA、propB、propC。代码示例如下：  
+
+**A.vue**
+
+```vue
+<template>
+  <div class="component-a">
+    <button @click="toggle">切换</button>
+    <component-b v-bind="bindValue1" />
+    <component-b v-bind="bindValue2" />
+  </div>
+</template>
+
+<script>
+  import ComponentB from './component-b.vue';
+  export default {
+    components: { ComponentB },
+    data() {
+      return {
+        bindValue1: {
+          propA: 1,
+          propB: 'aaa',
+          propC: false
+        },
+        bindValue2: { propA: 2 },
+      }
+    },
+    methods: {
+      toggle() {
+        if(this.bindValue1.propB) {
+          delete this.bindValue1.propB;
+          console.log(this.bindValue1);
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  .component-a {
+    width: 300px;
+    height: 200px;
+    margin: 10px;
+    border: 1px solid gray;
+  }
+</style>
+  
+```
+
+**B.vue**  
+
+```vue
+<template>
+  <div class="component-b">
+    <button @click="getAttrs">获取$attrs</button>
+    <div>{{ value }}</div>
+  </div>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        value: {}
+      }
+    },
+    methods: {
+      getAttrs() {
+        console.log(Object.prototype.hasOwnProperty.call(this.$attrs, 'propB'), this.$attrs.propB);
+        this.value = JSON.stringify(this.$attrs)
+      }
+    }
+  }
+</script>
+```
+
+### 问题描述
+父组件A在点击按钮时会使用delete方法删除`bindValue1`的`propB`属性，子组件B点击获取时打印发现`propB`还是旧值。   
+
+![](../images/daily-059.png)
+
+### 排查路径
+1. 尝试在组件A中打印`bindValue1`，发现点击切换按钮后`bindValue1`中已经没有`propB`属性  
+2. 尝试在组件A中修改切换按钮后的逻辑，将delete操作换成赋值操作，发现子组件B可以正常更新`propB`  
+3. 结论：delete操作导致`bindValue1`的属性丢失了响应性。   
+
+### 解决方案  
+使用不影响响应式的方式更新属性值。
