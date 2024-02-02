@@ -106,7 +106,7 @@ function cancelLoop() {
 ```
 
 ### 小结  
-每次使用`clearInterval`或`clearTimeout`后，需要及时重置`timerID`。
+通过`clearInterval(timerId)` 或`clearTimeout(timerId)`可以清除定时器，但是`timerId`并不会被置空，不能以`Boolean（timerId）`判断定时器已关闭。
 
 ## 3. 【lodash踩坑系列】多实例组件使用once仅触发一次噢
 ### 前置信息
@@ -369,3 +369,52 @@ vue项目，父组件A中引用了子组件B，其中B接收三个props分别为
 
 ### 解决方案  
 使用不影响响应式的方式更新属性值。
+
+## 5. window.open之你不知道的那些事  
+### 背景  
+系统有两个页面A/B可互相跳转。其中A页面中有个图片可以通过点击，利用自定义实现的`jump`方法新开一个tab页跳到B页面。B页面可以通过按钮点击跳到A。  
+
+### 问题
+操作步骤：  
+1. 进入A页面，点击图片跳到B页面（`jump(urlB)`）   
+2. 在上一步打开的B页面点击按钮，跳到A页面（`<a>`标签）   
+3. 在上一步打开的A页面，点击图片跳到B页面（`jump(urlB)`）  
+
+期望结果：  
+1. 新开tab页打开B页面  
+2. 当前页打开A页面   
+3. 新开tab页打开B页面
+
+实际结果：  
+1. 新开tab页打开B页面  
+2. 当前页打开A页面  
+3. 当前页打开B页面  
+
+### window.open
+`window.open(url, target, windowFeatures)`:  
+- `url`：一个字符串，表示要加载的资源的 URL 或路径。如果指定空字符串（""）或省略此参数，则会在目标浏览上下文中打开一个空白页。  
+- `target`：一个不含空格的字符串，用于指定加载资源的浏览上下文的名称。如果该名称无法识别现有的上下文，则会创建一个新的上下文，并赋予指定的名称。还可以使用特殊的 `target`关键字：`_self`、`_blank`、`_parent`和 `_top`。  
+- `windowFeatures`：一个字符串，包含以逗号分隔的窗口特性列表。非本节重点，不解释~   
+
+### 问题原因——窗口复用
+如果当前窗口已经存在`target`，则在此窗口执行`window.open(url)`的时候，不会再新开tab页加载新页面，而是在当前窗口中加载。如果要在每次调用`window.open()`的时候打开一个新窗口，就需要将参数`target`设置为`_blank`。  
+
+此处实现窗口复用的原理如下：  
+
+```js
+function jump(url, target = url) {
+  window.open(url, target || '_blank');
+}
+```
+
+引用上述问题，具体解释如下： 
+1. 进入A页面，点击图片跳到B页面（`jump(urlB)`）
+> 由于未指定`target`，因此会新开窗口跳到B（`window.open(urlB, urlB)`），此时B窗口存在`target` = 'urlB'  
+2. 在上一步打开的B页面点击按钮，跳到A页面（`<a>`标签）  
+> 此时B窗口存在`target` = 'urlB' 
+3. 在上一步打开的A页面，点击图片跳到B页面（`jump(urlB)`）  
+> 由于当前窗口的`target` = 'urlB'，且跳转的目标url也是'urlB'，因此不再新开窗口，直接在当前窗口加载新的B页面。
+
+
+
+
