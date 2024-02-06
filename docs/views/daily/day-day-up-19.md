@@ -125,4 +125,100 @@ function waitForPending() {
 2. 该npm包是本地存储的（如`npm link`或本地安装）。因为本地文件不经过网络，无需校验完整性。  
 3. 网络问题。如果在生成`yarn.lock`文件时遇到网络问题，可能导致某些包的下载和哈希计算失败，从而导致缺失`integrity`字段。
 
+## 5、使用IntersectionObserver实现懒加载
 
+### IntersectionObserver定义  
+MDN定义：  
+> 交叉观察器 API（Intersection Observer API）提供了一种异步检测目标元素与祖先元素或顶级文档的视口相交情况变化的方法。  
+
+可能用到相交检测的场景：  
+- 页面滚动时懒加载图片或其他内容  
+- 无限滚动：在滚动过程中加载和显示更多的内容，避免用户翻页  
+
+### 实践应用
+场景：仪表板界面有多个卡片，初始化时仅加载可视区内的卡片，当鼠标滚动时，随着卡片的状态从不可见 -> 可见，需要加载卡片内容。  
+
+`parent.vue`（仪表板页面，内部是多个卡片）  
+
+```vue
+<template>
+  <div class="parent">
+    <ChildComponent v-for="item in data" :key="item.id" :item="item" />
+  </div>
+</template>
+
+<script>
+import ChildComponent from 'child.vue';
+
+export default {
+  components: { ChildComponent },
+  data() {
+    return {
+      data: [
+        { id: 1, title: 'card-1' },
+        { id: 2, title: 'card-2' },
+        { id: 3, title: 'card-3' },
+        { id: 4, title: 'card-4' },
+        { id: 5, title: 'card-5' },
+        { id: 6, title: 'card-6' },
+        { id: 7, title: 'card-7' },
+        { id: 8, title: 'card-8' },
+        { id: 9, title: 'card-9' },
+        { id: 10, title: 'card-10' },
+        { id: 11, title: 'card-11' },
+        { id: 12, title: 'card-12' },
+        { id: 13, title: 'card-13' },
+        { id: 14, title: 'card-14' },
+      ]
+    }
+  }
+}
+</script>
+```
+
+`child.vue`(卡片组件)
+
+```vue
+<template>
+  <div class="child" v-loading="loading">{{ data }}</div>
+</template>
+
+<script>
+export default {
+  props: {
+    item: {
+      type: Object,
+      default: ()=> ({})
+    }
+  },
+  data() {
+    return {
+      loading: true,
+      data: null
+    }
+  },
+  mounted() {
+    this.intersectionObserver = new InterSectionObserver((changes) => {
+      // fix: 监听一个目标元素，短时间内交叉状态频繁发生变化时，会按照时间顺序生成多个changes
+      if(changes[changes.length - 1].isIntersecting) {
+        this.queryData();
+        this.instersectionObserver.disconnect();
+      }
+    }, { threshold: 0.1 });
+    this.intersectionObserver.observe(this.$el);
+  },
+  beforeDestroy() {
+    this.intersectionObserver?.disconnect();
+  },
+  methods: {
+    queryData() {
+      this.loading = true;
+      setTimeout(() => {
+        this.data = this.item.title;
+        this.loading = false;
+      }, 2000)
+    }
+  }
+}
+</script>
+```
