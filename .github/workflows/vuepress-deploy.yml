@@ -4,16 +4,24 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@master # 也是一个写好的action，用于切换分支
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: vuepress-deploys
-      # 使用别人写好的一个action
-      uses: jenkey2011/vuepress-deploy@master
-      env:
-        NODE_OPTIONS: --openssl-legacy-provider # 修复node版本不兼容报错 error:0308010C:digital envelope routines::unsupported
-        ACCESS_TOKEN: ${{ secrets.FLXU12 }}
-        TARGET_REPO: flXu12/flXu12.github.io
-        TARGET_BRANCH: gh-pages
-        BUILD_SCRIPT: yarn && yarn build
-        BUILD_DIR: docs/.vuepress/dist/
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 16
+
+      - name: Install and Build
+        env:
+          NODE_OPTIONS: --openssl-legacy-provider
+        run: |
+          yarn install
+          yarn build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/.vuepress/dist
+          publish_branch: gh-pages
