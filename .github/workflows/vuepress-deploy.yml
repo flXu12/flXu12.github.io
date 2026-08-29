@@ -11,6 +11,7 @@ jobs:
       # 使用别人写好的一个action
       uses: jenkey2011/vuepress-deploy@master
       env:
+        NODE_OPTIONS: --openssl-legacy-provider # 修复node版本不兼容报错 error:0308010C:digital envelope routines::unsupported
         ACCESS_TOKEN: ${{ secrets.FLXU12 }}
         TARGET_REPO: flXu12/flXu12.github.io
         TARGET_BRANCH: gh-pages
