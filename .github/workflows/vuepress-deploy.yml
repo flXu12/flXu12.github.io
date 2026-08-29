@@ -13,8 +13,6 @@ jobs:
           node-version: 16
 
       - name: Install and Build
-        env:
-          NODE_OPTIONS: --openssl-legacy-provider
         run: |
           yarn install
           yarn build
