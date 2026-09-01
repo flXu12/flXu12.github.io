@@ -1,6 +1,6 @@
 ---
 title: leetcode——验证回文串（125-简单）
-date: 2021-12-298
+date: 2021-12-29
 categories:
  - 算法
 tags:
